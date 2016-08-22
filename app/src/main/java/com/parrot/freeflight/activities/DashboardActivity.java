@@ -23,6 +23,7 @@ import android.util.Log;
 import com.parrot.freeflight.R;
 import com.parrot.freeflight.activities.base.DashboardActivityBase;
 import com.parrot.freeflight.activities.game.GameConnectActivity;
+import com.parrot.freeflight.activities.image.ImageActivity;
 import com.parrot.freeflight.receivers.DroneAvailabilityDelegate;
 import com.parrot.freeflight.receivers.DroneAvailabilityReceiver;
 import com.parrot.freeflight.receivers.DroneConnectionChangeReceiverDelegate;
@@ -216,7 +217,7 @@ implements
     @Override
     protected boolean onStartGuestSpace() 
     {
-        Intent intent = new Intent(this, GuestSpaceActivity.class);
+        Intent intent = new Intent(this, ImageActivity.class);
         startActivity(intent);
         
         return true;

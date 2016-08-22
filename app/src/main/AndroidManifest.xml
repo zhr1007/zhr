@@ -134,6 +134,9 @@
             android:launchMode="singleInstance"
             android:screenOrientation="landscape"
             android:theme="@style/FreeFlightTheme.HudScreen" />
+        <activity
+            android:name=".activities.image.ImageActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
