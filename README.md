@@ -1,3 +1,7 @@
+# Note
+
+Copy from [this repo](https://github.com/SUPENTA/ardrone-sdk-android)
+
 # Parrot AR Drone SDK v2.0.1 - ENHANCED
 Parrot's official AR.Drone SDK 2.0.1, now up-to-date to work with Android Studio.
 
