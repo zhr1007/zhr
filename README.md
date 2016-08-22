@@ -1,3 +1,4 @@
+By cuijingmao and Shuriken13
 # Note
 
 Copy from [this repo](https://github.com/SUPENTA/ardrone-sdk-android)
