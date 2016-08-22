@@ -529,4 +529,8 @@ implements
         showAlertDialog(getString(R.string.Update_Warning), getString(R.string.Please_unplug_your_USB_key_from_the_ARDrone_now), actionOnDismiss);
     }
 
+    @Override
+    protected boolean onStartGames() {
+        return super.onStartGames();
+    }
 }
