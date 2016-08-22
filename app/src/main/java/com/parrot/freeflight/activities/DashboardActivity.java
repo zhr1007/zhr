@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.parrot.freeflight.R;
 import com.parrot.freeflight.activities.base.DashboardActivityBase;
+import com.parrot.freeflight.activities.game.GameConnectActivity;
 import com.parrot.freeflight.receivers.DroneAvailabilityDelegate;
 import com.parrot.freeflight.receivers.DroneAvailabilityReceiver;
 import com.parrot.freeflight.receivers.DroneConnectionChangeReceiverDelegate;
@@ -530,7 +531,20 @@ implements
     }
 
     @Override
+    protected boolean isParrotGamesEnabled() {
+        return droneOnNetwork;
+    }
+
+    @Override
     protected boolean onStartGames() {
-        return super.onStartGames();
+        if (!droneOnNetwork)
+        {
+            return false;
+        }
+
+        Intent gameConnectActivity = new Intent(this, GameConnectActivity.class);
+        startActivity(gameConnectActivity);
+
+        return true;
     }
 }
