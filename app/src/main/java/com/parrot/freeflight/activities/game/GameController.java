@@ -43,7 +43,7 @@ public class GameController {
                 }
                 controlService.moveForward((float) 0.2); // slowly move forward
                 while (ardroneStatus == 0){
-                    controlService.takePhoto();
+//                    controlService.takePhoto();
                     GameCommand command = imageToCommand.getCommand();
                     controlService.setRoll(command.roll);
                 }

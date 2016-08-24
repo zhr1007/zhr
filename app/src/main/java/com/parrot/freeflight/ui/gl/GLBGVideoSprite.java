@@ -130,7 +130,14 @@ public class GLBGVideoSprite extends GLSprite
 		
 		return success;
 	}
-	
+
+    public boolean isVideoReady(){
+        return isVideoReady;
+    }
+
+	public Bitmap getVideoBitmap(){
+        return Bitmap.createBitmap(video);
+    }
 	
 	private native boolean onUpdateVideoTextureNative(int program, int textureId);
 	private native void onSurfaceCreatedNative();
