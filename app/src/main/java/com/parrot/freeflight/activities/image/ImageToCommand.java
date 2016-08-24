@@ -1,5 +1,6 @@
 package com.parrot.freeflight.activities.image;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -102,16 +103,20 @@ public class ImageToCommand {
         Log.d(LOG_TAG, ardroneDir.getAbsolutePath());
         File save = new File(ardroneDir, "test.jpg");
 
-        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "test.jpg", "test");
+        try {
+            FileOutputStream out = new FileOutputStream(save);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-//        FileOutputStream out = null;
-//        try {
-//            out = new FileOutputStream(save);
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-//            out.flush();
-//            out.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.MediaColumns.DATA, save.getAbsolutePath());
+
+        context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 }
