@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.parrot.freeflight.activities.game.GameCommand;
@@ -43,15 +44,15 @@ public class ImageToCommand {
         PointF pointF = ImageProcessor.centroid(bitmap);
 
         if (pointF.x < -1 && pointF.y < -1){
-            command.roll = 0;
+            command.yaw = 0;
         }
         else if (pointF.x > 0){
-            command.roll = (float) 0.5;
+            command.yaw = (float) 0.2;
         }
         else if (pointF.x < 0){
-            command.roll = (float) -0.5;
+            command.yaw = (float) -0.2;
         }
-        Log.d(LOG_TAG, "command:"+pointF.x+","+pointF.y+";"+command.roll);
+        Log.d(LOG_TAG, "command:"+pointF.x+","+pointF.y+";"+command.yaw);
         return command;
     }
 
@@ -93,19 +94,24 @@ public class ImageToCommand {
     }
 
     private void saveBitmap(Bitmap bitmap){
+
+
         File imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         Log.d(LOG_TAG, imageDir.getAbsolutePath());
         File ardroneDir = new File(imageDir, "AR.Drone");
         Log.d(LOG_TAG, ardroneDir.getAbsolutePath());
         File save = new File(ardroneDir, "test.jpg");
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(save);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "test.jpg", "test");
+
+//        FileOutputStream out = null;
+//        try {
+//            out = new FileOutputStream(save);
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+//            out.flush();
+//            out.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

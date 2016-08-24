@@ -45,7 +45,7 @@ public class GameController {
                 while (ardroneStatus == 0){
 //                    controlService.takePhoto();
                     GameCommand command = imageToCommand.getCommand();
-                    controlService.setRoll(command.roll);
+                    controlService.setYaw(command.yaw);
                 }
             }
         });
