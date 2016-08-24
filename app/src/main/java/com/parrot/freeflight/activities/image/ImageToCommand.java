@@ -3,6 +3,7 @@ package com.parrot.freeflight.activities.image;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.os.Environment;
 import android.util.Log;
 
@@ -29,7 +30,14 @@ public class ImageToCommand {
     public GameCommand getCommand(){
         GameCommand command = new GameCommand();
         Bitmap bitmap = loadImage();
-        
+        bitmap = ImageProcessor.showPicRedBlack(bitmap);
+        PointF pointF = ImageProcessor.centroid(bitmap);
+        if (pointF.x > 0){
+            command.roll = (float) 0.5;
+        }
+        else if (pointF.x < 0){
+            command.roll = (float) -0.5;
+        }
         return command;
     }
 

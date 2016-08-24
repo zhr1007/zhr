@@ -34,6 +34,7 @@ public class GameController {
         controlThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                controlService.switchCamera();
                 controlService.triggerTakeOff();
                 try {
                     Thread.sleep(5000);
@@ -44,7 +45,7 @@ public class GameController {
                 while (ardroneStatus == 0){
                     controlService.takePhoto();
                     GameCommand command = imageToCommand.getCommand();
-                    controlService.setYaw(command.yaw);
+                    controlService.setRoll(command.roll);
                 }
             }
         });

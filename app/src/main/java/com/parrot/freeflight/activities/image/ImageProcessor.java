@@ -9,7 +9,7 @@ import android.util.Log;
  */
 public class ImageProcessor {
 
-    Bitmap processImage(Bitmap image) {
+    static Bitmap processImage(Bitmap image) {
 
         image = showPicRedBlack(image);//
 
@@ -23,10 +23,10 @@ public class ImageProcessor {
      * @param bmp
      * @return，
      */
-    private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
+    static private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
         long start = System.currentTimeMillis();
         // 拉普拉斯矩阵
-        int[] laplacian = new int[]{-1, -1, -1, -1, 9, -1, -1, -1, -1};
+        int[] laplacian = new int[] { -1, -1, -1, -1, 9, -1, -1, -1, -1};
 
         int width = bmp.getWidth();
         int height = bmp.getHeight();
@@ -84,7 +84,7 @@ public class ImageProcessor {
      * 判断红色像素点，单独显示，其他点显示为黑色
      */
 
-    public Bitmap showPicRedBlack(Bitmap bmp) {
+    static public Bitmap showPicRedBlack(Bitmap bmp) {
         int pixR = 0;
         int pixG = 0;
         int pixB = 0;
@@ -149,43 +149,40 @@ public class ImageProcessor {
      * 返回路径中心的坐标，[-1,1]之间
      */
 
-    public PointF centroid(Bitmap  bmp)
-    {
+    static public PointF centroid(Bitmap  bmp) {
         PointF pointF = new PointF();
         int width = bmp.getWidth();
         int height = bmp.getHeight();
-        int pixColor=0;  //像素信息
-        int pixR=0;
-        int redNum=0;  //红黑图中，红点的总个数
+        int pixColor = 0; //像素信息
+        int pixR = 0;
+        int redNum = 0; //红黑图中，红点的总个数
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
-        float   centerx=0;    //形心的x坐标
-        float   centery=0;   //形心的y坐标
+        float   centerx = 0;  //形心的x坐标
+        float   centery = 0; //形心的y坐标
 
 
-          for (int i=0;i<width;i++)
-          {
-              for (int j=0;j<height;j++)
-              {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
 
-                  pixColor = pixels[i * width + j];
-                  pixR=Color.red(pixColor);
+                pixColor = pixels[i * width + j];
+                pixR = Color.red(pixColor);
 
-                  //如果红色通道大于0，则为红色，则累加centerx，centery,
-                  //否则为黑色，不累加
-                  if (pixR>0)
-                  {redNum=redNum+1;
-                      centerx+=centerx;
-                      centery+=centery;
-                  }
+                //如果红色通道大于0，则为红色，则累加centerx，centery,
+                //否则为黑色，不累加
+                if (pixR > 0) {
+                    redNum = redNum + 1;
+                    centerx += centerx;
+                    centery += centery;
+                }
 
-              }
-          }
-        centerx=2*centerx/redNum/width-1;
-        centery=2*centery/redNum/height-1;
-        pointF.x=centerx;
-        pointF.y=centery;
+            }
+        }
+        centerx = 2 * centerx / redNum / width - 1;
+        centery = 2 * centery / redNum / height - 1;
+        pointF.x = centerx;
+        pointF.y = centery;
 
         return pointF;
     }
@@ -198,58 +195,49 @@ public class ImageProcessor {
      * @param bmp  处理过的红黑图像
      * @return   去除黑色斑点的红黑图像
      */
-    public  Bitmap nineCorrect(Bitmap bmp)
-    {
+    static public  Bitmap nineCorrect(Bitmap bmp) {
         int width = bmp.getWidth();
         int height = bmp.getHeight();
-        int pixColor=0;  //像素信息
-      //  int pixR=0;
-        int redNum=0;     //九宫格中
+        int pixColor = 0; //像素信息
+        //  int pixR=0;
+        int redNum = 0;   //九宫格中
         int[] pixels = new int[width * height];
         int[] pixelR = new int[width * height];   //记录每个像素点的R通道值
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
 
         //提取每个像素点R通道值，记在pixelR中
-        for (int i=0;i<width;i++)
-        {
-            for(int j=0;j<height;j++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 pixColor = pixels[i * width + j];
                 pixelR[i * width + j] = Color.red(pixColor);
             }
         }
 
         //矫正黑点
-        for (int i=0;i<width;i++)
-        {
-            for(int j=0;j<height;j++)
-            {     redNum=0;   //对每个像素点初始化九宫格的红点计数
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                redNum = 0; //对每个像素点初始化九宫格的红点计数
                 //只对中心的黑点矫正
-                if (pixelR[i * width + j]==0)
-                {
-                //边缘点不进行矫正
-                if (i!=0 && i!=width-1 && j!=0 && j!=height)
-                {
+                if (pixelR[i * width + j] == 0) {
+                    //边缘点不进行矫正
+                    if (i != 0 && i != width - 1 && j != 0 && j != height) {
 
-                    //对九宫格进行循环，计数红点的个数
-                    for (int k = -1; k < 2; k++)
-                    {
+                        //对九宫格进行循环，计数红点的个数
+                        for (int k = -1; k < 2; k++) {
 
-                        for (int m = -1; m < 2; m++)
-                        {
+                            for (int m = -1; m < 2; m++) {
 
-                            if (pixelR[(i + k) * width + j + m] == 255) //红色
-                            {
-                                redNum = redNum + 1;
+                                if (pixelR[(i + k) * width + j + m] == 255) { //红色
+                                    redNum = redNum + 1;
+                                }
                             }
+
                         }
-
                     }
-                }
 
                 }
 
-                if (redNum>4)
-                {
+                if (redNum > 4) {
                     pixels[i * width + j] = Color.argb(255, 255, 0, 0);  //设为红色
                 }
 
@@ -263,18 +251,16 @@ public class ImageProcessor {
 
         return bmp;
 
-        }
+    }
 
     /**
      * @param bmp 需要用九宫格矫正的红黑图像
      * @param n   迭代利用nineCorrect进行矫正的次数
      * @return   矫正后的红黑图
      */
-    public  Bitmap IterNineCorrect(Bitmap bmp,int n)
-    {
-        for (int i=0;i<n;i++)
-        {
-            bmp=nineCorrect(bmp);
+    static public  Bitmap IterNineCorrect(Bitmap bmp, int n) {
+        for (int i = 0; i < n; i++) {
+            bmp = nineCorrect(bmp);
         }
         return bmp;
     }
@@ -297,26 +283,19 @@ public class ImageProcessor {
      *
      * @param pointf 来自函数centroid: 路径中心相对于图片中心的位置，x,y均为[-1,1]之间，
      */
-   public  void keepToPath (PointF pointf)
-   {
-       double x=pointf.x;
-       double y=pointf.y;
-       if (x>0)
-       {
-           //飞行器右移
-       }
-       else if(x<0)
-       {
-           //飞行器左移
-       }
-       if(y>0)
-       {
-           //飞行器前进
-       }
-       else if(y<0)
-       {
-           //飞行器后退
-       }
-   }
+    static public  void keepToPath (PointF pointf) {
+        double x = pointf.x;
+        double y = pointf.y;
+        if (x > 0) {
+            //飞行器右移
+        } else if (x < 0) {
+            //飞行器左移
+        }
+        if (y > 0) {
+            //飞行器前进
+        } else if (y < 0) {
+            //飞行器后退
+        }
+    }
 
 }
