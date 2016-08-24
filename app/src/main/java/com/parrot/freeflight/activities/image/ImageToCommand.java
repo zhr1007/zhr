@@ -29,9 +29,13 @@ public class ImageToCommand {
 
     public GameCommand getCommand(){
         GameCommand command = new GameCommand();
+        // read photo to bitmap
         Bitmap bitmap = loadImage();
+
+        // use CJM
         bitmap = ImageProcessor.showPicRedBlack(bitmap);
         PointF pointF = ImageProcessor.centroid(bitmap);
+
         if (pointF.x > 0){
             command.roll = (float) 0.5;
         }
@@ -42,6 +46,7 @@ public class ImageToCommand {
     }
 
     private Bitmap loadImage(){
+        // find image path of Android
         File imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         Log.d(LOG_TAG, imageDir.getAbsolutePath());
         File ardroneDir = new File(imageDir, "AR.Drone");
@@ -53,6 +58,8 @@ public class ImageToCommand {
             }
         };
         File[] images = ardroneDir.listFiles(filenameFilter);
+
+        // wait for the photo ready
         while (images.length == lastCnt){
             try {
                 Thread.sleep(10);
@@ -66,6 +73,8 @@ public class ImageToCommand {
         for (File image: images){
             Log.d(LOG_TAG, image.getName());
         }
+
+        // read the latest photo
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         Bitmap bitmap = BitmapFactory.decodeFile(images[images.length-1].getAbsolutePath(),bmOptions);
         return bitmap;
