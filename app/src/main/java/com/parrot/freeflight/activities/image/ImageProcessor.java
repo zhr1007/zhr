@@ -166,7 +166,7 @@ public class ImageProcessor {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
 
-                pixColor = pixels[i * width + j];
+                pixColor = pixels[j * width + i];
                 pixR = Color.red(pixColor);
 
                 //如果红色通道大于0，则为红色，则累加centerx，centery,
@@ -184,6 +184,12 @@ public class ImageProcessor {
         pointF.x = centerx;
         pointF.y = centery;
 
+
+        if (redNum<10){
+            pointF.x = (float)-2.0;
+            pointF.y = (float)-2.0;
+
+        }
         return pointF;
     }
 
@@ -208,8 +214,8 @@ public class ImageProcessor {
         //提取每个像素点R通道值，记在pixelR中
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                pixColor = pixels[i * width + j];
-                pixelR[i * width + j] = Color.red(pixColor);
+                pixColor = pixels[j * width + i];
+                pixelR[j * width + i] = Color.red(pixColor);
             }
         }
 
@@ -218,7 +224,7 @@ public class ImageProcessor {
             for (int j = 0; j < height; j++) {
                 redNum = 0; //对每个像素点初始化九宫格的红点计数
                 //只对中心的黑点矫正
-                if (pixelR[i * width + j] == 0) {
+                if (pixelR[j * width + i] == 0) {
                     //边缘点不进行矫正
                     if (i != 0 && i != width - 1 && j != 0 && j != height) {
 
@@ -227,7 +233,7 @@ public class ImageProcessor {
 
                             for (int m = -1; m < 2; m++) {
 
-                                if (pixelR[(i + k) * width + j + m] == 255) { //红色
+                                if (pixelR[(j+ m) * width + i+k] == 255) { //红色
                                     redNum = redNum + 1;
                                 }
                             }
@@ -238,7 +244,7 @@ public class ImageProcessor {
                 }
 
                 if (redNum > 4) {
-                    pixels[i * width + j] = Color.argb(255, 255, 0, 0);  //设为红色
+                    pixels[j * width + i] = Color.argb(255, 255, 0, 0);  //设为红色
                 }
 
 
