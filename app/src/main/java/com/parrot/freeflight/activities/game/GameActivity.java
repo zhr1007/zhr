@@ -28,6 +28,7 @@ import com.parrot.freeflight.R;
 import com.parrot.freeflight.activities.SettingsDialog;
 import com.parrot.freeflight.activities.WarningDialog;
 import com.parrot.freeflight.activities.base.ParrotActivity;
+import com.parrot.freeflight.activities.image.ImageToCommand;
 import com.parrot.freeflight.drone.DroneConfig;
 import com.parrot.freeflight.drone.NavData;
 import com.parrot.freeflight.receivers.DroneBatteryChangedReceiver;
@@ -61,6 +62,7 @@ import com.parrot.freeflight.ui.HudViewController;
 import com.parrot.freeflight.ui.SettingsDialogDelegate;
 import com.parrot.freeflight.ui.hud.AcceleroJoystick;
 import com.parrot.freeflight.ui.hud.AnalogueJoystick;
+import com.parrot.freeflight.ui.hud.Image;
 import com.parrot.freeflight.ui.hud.JoystickBase;
 import com.parrot.freeflight.ui.hud.JoystickFactory;
 import com.parrot.freeflight.ui.hud.JoystickListener;
@@ -68,8 +70,11 @@ import com.parrot.freeflight.utils.NookUtils;
 import com.parrot.freeflight.utils.SystemUtils;
 
 import java.io.File;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SuppressLint("NewApi")
 public class GameActivity
@@ -137,6 +142,8 @@ public class GameActivity
 
     private List<ButtonController> buttonControllers;
 
+    GameController gameController;
+
     private ServiceConnection mConnection = new ServiceConnection()
     {
 
@@ -144,6 +151,9 @@ public class GameActivity
         {
             droneControlService = ((DroneControlService.LocalBinder) service).getService();
             onDroneServiceConnected();
+
+            gameController = new GameController(GameActivity.this, droneControlService);
+            gameController.start();
         }
 
         public void onServiceDisconnected(ComponentName name)
@@ -700,6 +710,8 @@ public class GameActivity
         super.onDestroy();
         Log.d(TAG, "GameActivity destroyed");
         System.gc();
+
+        gameController.stop();
     }
 
     private void registerReceivers()
