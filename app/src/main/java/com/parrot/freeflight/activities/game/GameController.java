@@ -34,14 +34,14 @@ public class GameController {
         controlThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                controlService.switchCamera();
+                controlService.switchCamera(); //switch to the camera below
                 controlService.triggerTakeOff();
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(5000);     // wait takeoff
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                controlService.moveForward((float) 0.2);
+                controlService.moveForward((float) 0.2); // slowly move forward
                 while (ardroneStatus == 0){
                     controlService.takePhoto();
                     GameCommand command = imageToCommand.getCommand();
