@@ -182,25 +182,30 @@ public class ImageProcessor {
      * 以图形中心为坐标中心，x轴向右，y轴向上，各自范围[-1,1]
      * 返回路径中心的坐标，[-1,1]之间
      * 若返回[-2,-2]，表示图像中白点少于100个，摄像机未拍到路径
+     * 上下两部分
      */
 
     static public PointF[] centroid(Bitmap bmp) {
-        PointF pointF = new PointF();
+      //  PointF pointF = new PointF();
         int width = bmp.getWidth();
         int height = bmp.getHeight();
         int pixColor = 0; //像素信息
         int pixR = 0;
         int pixG = 0;
         int pixB = 0;
-        int whiteNum = 0; //黑白图中，红点的总个数
+        int whiteUpNum = 0; //黑白图中，白点的总个数
+        int whiteDownNum = 0; //黑白图中，白点的总个数
+        PointF[] pointFs = new PointF[2];
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
-        double centerX = 0;  //形心的x坐标
-        double centerY = 0; //形心的y坐标
+        double centerXup = 0;  //形心的x坐标
+        double centerXdown = 0;  //形心的x坐标
+        double centerYup = 0; //形心的y坐标
+        double centerYdown = 0; //形心的y坐标
+         int   halfHeight= height/2;
 
-
-        for (int i = 0; i < height; i++) {
+        for (int i = 0; i <halfHeight; i++) {
             for (int j = 0; j < width; j++) {
 
                 pixColor = pixels[i * width + j];
@@ -211,27 +216,54 @@ public class ImageProcessor {
                 //如果红色通道大于0，则为红色，则累加centerx，centery,
                 //否则为黑色，不累加
                 if (pixR==255  && pixG==255 &&pixB==255) {
-                    whiteNum = whiteNum + 1;
-                    centerX += j;
-                    centerY += i;
+                    whiteUpNum = whiteUpNum + 1;
+                    centerXup += j;
+                    centerYup += (height-i);
                 }
 
             }
         }
-        centerX = 2 * centerX /whiteNum / width - 1;
-        centerY = 2 * centerY /whiteNum / height - 1;
-        pointF.x = (float) centerX;
-        pointF.y = (float) -centerY;
 
-
-        if (whiteNum < 100) {
-            pointF.x = (float) -2.0;
-            pointF.y = (float) -2.0;
+        centerXup = 2 * centerXup/whiteUpNum / width - 1;
+        centerYup = 2 * centerYup /whiteUpNum / height - 1;
+        pointFs[0].x = (float) centerXup;
+        pointFs[0].y = (float) centerYup;
+        if (whiteDownNum < 100) {
+            pointFs[0].x = (float) -2.0;
+            pointFs[0].y = (float) -2.0;
 
         }
 
-        PointF[] pointFs = new PointF[2];
-        pointFs[0] = pointF;
+        for (int i = halfHeight; i <height; i++) {
+            for (int j = 0; j < width; j++) {
+
+                pixColor = pixels[i * width + j];
+                pixR = Color.red(pixColor);
+                pixG = Color.green(pixColor);
+                pixB = Color.blue(pixColor);
+
+                //如果红色通道大于0，则为红色，则累加centerx，centery,
+                //否则为黑色，不累加
+                if (pixR==255  && pixG==255 &&pixB==255) {
+                    whiteDownNum = whiteDownNum + 1;
+                    centerXdown += j;
+                    centerYdown +=(height-i) ;
+                }
+
+            }
+        }
+        centerXdown = 2 * centerXdown /whiteDownNum / width - 1;
+        centerYdown = 2 * centerYdown /whiteDownNum / height - 1;
+        pointFs[1].x = (float) centerXdown;
+        pointFs[1].y = (float) centerYdown;
+
+
+        if (whiteDownNum < 100) {
+            pointFs[1].x = (float) -2.0;
+            pointFs[1].y = (float) -2.0;
+
+        }
+
         return pointFs;
     }
 
@@ -244,75 +276,75 @@ public class ImageProcessor {
      * @param bmp 处理过的红黑图像
      * @return 去除黑色斑点的红黑图像
      */
-    static public Bitmap nineCorrect(Bitmap bmp) {
-        int width = bmp.getWidth();
-        int height = bmp.getHeight();
-        int pixColor = 0; //像素信息
-        //  int pixR=0;
-        int redNum = 0;   //九宫格中
-        int[] pixels = new int[width * height];
-        int[] pixelR = new int[width * height];   //记录每个像素点的R通道值
-        bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
+//    static public Bitmap nineCorrect(Bitmap bmp) {
+//        int width = bmp.getWidth();
+//        int height = bmp.getHeight();
+//        int pixColor = 0; //像素信息
+//        //  int pixR=0;
+//        int redNum = 0;   //九宫格中
+//        int[] pixels = new int[width * height];
+//        int[] pixelR = new int[width * height];   //记录每个像素点的R通道值
+//        bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
+//
+//        //提取每个像素点R通道值，记在pixelR中
+//        for (int i = 0; i < width; i++) {
+//            for (int j = 0; j < height; j++) {
+//                pixColor = pixels[j * width + i];
+//                pixelR[j * width + i] = Color.red(pixColor);
+//            }
+//        }
 
-        //提取每个像素点R通道值，记在pixelR中
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                pixColor = pixels[j * width + i];
-                pixelR[j * width + i] = Color.red(pixColor);
-            }
-        }
-
-        //矫正黑点
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                redNum = 0; //对每个像素点初始化九宫格的红点计数
-                //只对中心的黑点矫正
-                if (pixelR[j * width + i] == 0) {
-                    //边缘点不进行矫正
-                    if (i != 0 && i != width - 1 && j != 0 && j != height) {
-
-                        //对九宫格进行循环，计数红点的个数
-                        for (int k = -1; k < 2; k++) {
-
-                            for (int m = -1; m < 2; m++) {
-
-                                if (pixelR[(j + m) * width + i + k] == 255) { //红色
-                                    redNum = redNum + 1;
-                                }
-                            }
-
-                        }
-                    }
-
-                }
-
-                if (redNum > 4) {
-                    pixels[j * width + i] = Color.argb(255, 255, 0, 0);  //设为红色
-                }
-
-
-            }
-
-        }
-
-        //重新设置RGB通道
-        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
-
-        return bmp;
-
-    }
+//        //矫正黑点
+//        for (int i = 0; i < width; i++) {
+//            for (int j = 0; j < height; j++) {
+//                redNum = 0; //对每个像素点初始化九宫格的红点计数
+//                //只对中心的黑点矫正
+//                if (pixelR[j * width + i] == 0) {
+//                    //边缘点不进行矫正
+//                    if (i != 0 && i != width - 1 && j != 0 && j != height) {
+//
+//                        //对九宫格进行循环，计数红点的个数
+//                        for (int k = -1; k < 2; k++) {
+//
+//                            for (int m = -1; m < 2; m++) {
+//
+//                                if (pixelR[(j + m) * width + i + k] == 255) { //红色
+//                                    redNum = redNum + 1;
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//
+//                }
+//
+//                if (redNum > 4) {
+//                    pixels[j * width + i] = Color.argb(255, 255, 0, 0);  //设为红色
+//                }
+//
+//
+//            }
+//
+//        }
+//
+//        //重新设置RGB通道
+//        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
+//
+//        return bmp;
+//
+//    }
 
     /**
      * @param bmp 需要用九宫格矫正的红黑图像
      * @param n   迭代利用nineCorrect进行矫正的次数
      * @return 矫正后的红黑图
      */
-    static public Bitmap IterNineCorrect(Bitmap bmp, int n) {
-        for (int i = 0; i < n; i++) {
-            bmp = nineCorrect(bmp);
-        }
-        return bmp;
-    }
+//    static public Bitmap IterNineCorrect(Bitmap bmp, int n) {
+//        for (int i = 0; i < n; i++) {
+//            bmp = nineCorrect(bmp);
+//        }
+//        return bmp;
+//    }
 
 
     /**
@@ -331,20 +363,20 @@ public class ImageProcessor {
     /**
      * @param pointf 来自函数centroid: 路径中心相对于图片中心的位置，x,y均为[-1,1]之间，
      */
-    static public void keepToPath(PointF pointf) {
-        double x = pointf.x;
-        double y = pointf.y;
-        if (x > 0) {
-            //飞行器右移
-        } else if (x < 0) {
-            //飞行器左移
-        }
-        if (y > 0) {
-            //飞行器前进
-        } else if (y < 0) {
-            //飞行器后退
-        }
-    }
+//    static public void keepToPath(PointF pointf) {
+//        double x = pointf.x;
+//        double y = pointf.y;
+//        if (x > 0) {
+//            //飞行器右移
+//        } else if (x < 0) {
+//            //飞行器左移
+//        }
+//        if (y > 0) {
+//            //飞行器前进
+//        } else if (y < 0) {
+//            //飞行器后退
+//        }
+//    }
 
 
     /**
