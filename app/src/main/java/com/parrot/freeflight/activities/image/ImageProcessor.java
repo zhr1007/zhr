@@ -46,6 +46,8 @@ public class ImageProcessor {
 
         //HSV filter
         bitmap = hsvFilter(bitmap);
+
+      //  Log.d(LOG_TAG,"enter");
         return bitmap;
     }
 
@@ -189,7 +191,7 @@ public class ImageProcessor {
         int pixR = 0;
         int pixG = 0;
         int pixB = 0;
-        int whiteNum = 0; //红黑图中，红点的总个数
+        int whiteNum = 0; //黑白图中，红点的总个数
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
