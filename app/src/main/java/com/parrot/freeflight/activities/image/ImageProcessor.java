@@ -47,8 +47,12 @@ public class ImageProcessor {
         //HSV filter
         bitmap = hsvFilter(bitmap);
         PointF[] centers = centroid(bitmap);
+<<<<<<< HEAD
         PointF center = centers[0];
         Log.d(LOG_TAG, "center:" + center.x + "," + center.y);
+=======
+        Log.d(LOG_TAG,"center:" + centers[0].x + "," + centers[0].y + ";" + centers[1].x + "," + centers[1].y);
+>>>>>>> master
         return bitmap;
     }
 
@@ -196,6 +200,8 @@ public class ImageProcessor {
         int whiteUpNum = 0; //黑白图中，白点的总个数
         int whiteDownNum = 0; //黑白图中，白点的总个数
         PointF[] pointFs = new PointF[2];
+        pointFs[0] = new PointF();
+        pointFs[1] = new PointF();
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
@@ -203,7 +209,11 @@ public class ImageProcessor {
         double centerXdown = 0;  //形心的x坐标
         double centerYup = 0; //形心的y坐标
         double centerYdown = 0; //形心的y坐标
+<<<<<<< HEAD
         int halfHeight = height / 2;
+=======
+        int  halfHeight= height/2;
+>>>>>>> master
 
         for (int i = 0; i < halfHeight; i++) {
             for (int j = 0; j < width; j++) {
@@ -228,7 +238,7 @@ public class ImageProcessor {
         centerYup = 2 * centerYup / whiteUpNum / height - 1;
         pointFs[0].x = (float) centerXup;
         pointFs[0].y = (float) centerYup;
-        if (whiteDownNum < 100) {
+        if (whiteUpNum < 100) {
             pointFs[0].x = (float) -2.0;
             pointFs[0].y = (float) -2.0;
 

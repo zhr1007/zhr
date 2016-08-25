@@ -12,6 +12,8 @@ import android.util.Log;
 import com.parrot.freeflight.activities.game.GameCommand;
 import com.parrot.freeflight.ui.gl.GLBGVideoSprite;
 
+import org.opencv.core.Point;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,18 +44,33 @@ public class ImageToCommand {
 
         // use CJM
         bitmap = ImageProcessor.hsvFilter(bitmap);
-        PointF pointF = ImageProcessor.centroid(bitmap)[0];
-
-        if (pointF.x < -1 && pointF.y < -1){
-            command.yaw = 0;
+        PointF[] points = ImageProcessor.centroid(bitmap);
+        bitmap.recycle();
+        float power = 0.02f;
+        float powerBig = 0.05f;
+        if (points[0].x < -1 && points[0].y < -1 && points[1].x < -1 && points[1].y < -1){
+            command.command = "stable";
         }
-        else if (pointF.x > 0){
-            command.yaw = (float) 0.1;
+        else if (points[0].x < -1 && points[0].y < -1 && (points[1].x > -1 || points[1].y > -1)){
+            command.pitch = power;
         }
-        else if (pointF.x < 0){
-            command.yaw = (float) -0.1;
+        else if (points[1].x < -1 && points[1].y < -1 && (points[0].x > -1 || points[0].y > -1)){
+            command.pitch = -power;
         }
-        Log.d(LOG_TAG, "command:"+pointF.x+","+pointF.y+";"+command.yaw);
+        else if (points[0].x < -0.1 && points[1].x < -0.1){
+            command.roll = -powerBig;
+        }
+        else if (points[0].x > 0.1 && points[1].x > 0.1){
+            command.roll = powerBig;
+        }
+        else if (points[0].x > 0.1 && points[1].x < -0.1) {
+            command.yaw = powerBig;
+        }
+        else if (points[0].x < -0.1 && points[1].x > 0.1){
+            command.yaw = -powerBig;
+        }
+        Log.d(LOG_TAG, "center:"+points[0].x + "," + points[0].y + ";" + points[1].x + "," + points[1].y);
+        Log.d(LOG_TAG, "command:" + command.pitch + "," + command.roll + "," + command.yaw);
         return command;
     }
 
