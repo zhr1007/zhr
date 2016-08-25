@@ -5,11 +5,17 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.util.Log;
 
+import com.parrot.freeflight.ui.hud.Image;
+
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 //import java.lang.Object;
@@ -19,23 +25,27 @@ import org.opencv.core.Size;
  */
 public class ImageProcessor {
 
+    static final String LOG_TAG = ImageProcessor.class.getSimpleName();
+
     static Bitmap processImage(Bitmap image) {
-        int width = image.getWidth();
-        int height =image.getHeight();
+//        int width = image.getWidth();
+//        int height = image.getHeight();
+
         //gaussion blur
+        Bitmap bitmap = image.copy(Bitmap.Config.ARGB_8888, false);
+        Mat imgMat = new Mat();
+        Mat imgMatBlurred = new Mat();
+        Utils.bitmapToMat(bitmap, imgMat);
+        Imgproc.GaussianBlur(imgMat, imgMatBlurred, new Size(7, 7), 0, 0);   //
+        Utils.matToBitmap(imgMatBlurred, bitmap);
+//
+//
+//        image = showPicRedBlack(image);//
 
-         Mat imgMat=new Mat();
-        Mat imgMatBlurred=new Mat();
-        Utils.bitmapToMat(image,imgMat);
-         //gausionblur
-        Imgproc.GaussianBlur(imgMat,imgMatBlurred,new Size(7,7),0,0 );   //
-       Utils.matToBitmap(imgMatBlurred,image);
 
-
-        image = showPicRedBlack(image);//
-
-        //Imgproc.
-        return image;
+        //HSV filter
+        bitmap = hsvFilter(bitmap);
+        return bitmap;
     }
 
     /**
@@ -47,7 +57,7 @@ public class ImageProcessor {
     static private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
         long start = System.currentTimeMillis();
         // 拉普拉斯矩阵
-        int[] laplacian = new int[] { -1, -1, -1, -1, 9, -1, -1, -1, -1};
+        int[] laplacian = new int[]{-1, -1, -1, -1, 9, -1, -1, -1, -1};
 
         int width = bmp.getWidth();
         int height = bmp.getHeight();
@@ -119,7 +129,7 @@ public class ImageProcessor {
         int[] pixelG = new int[width * height];  //G通道
         int[] pixelB = new int[width * height];  //B通道
         int[] pixels = new int[width * height];   //记录每个像素点的rgb值
-      //  Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        //  Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
 
         /**
@@ -156,21 +166,20 @@ public class ImageProcessor {
 
         }
         //返回修改后的图像
-         bmp.setPixels(pixels, 0, width, 0, 0, width, height);
+        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
 
         return bmp;
     }
 
     /**
-     *
      * 路径在图像中一般呈平行四边形，计算形心的位置
      * 目的是：根据形心与图像中心的差，动态调整四旋翼的路径
      * 输入：经过处理后的二色图像（红与黑）
-     *以图形中心为坐标中心，x轴向右，y轴向上，各自范围[-1,1]
+     * 以图形中心为坐标中心，x轴向右，y轴向上，各自范围[-1,1]
      * 返回路径中心的坐标，[-1,1]之间
      */
 
-    static public PointF centroid(Bitmap  bmp) {
+    static public PointF centroid(Bitmap bmp) {
         PointF pointF = new PointF();
         int width = bmp.getWidth();
         int height = bmp.getHeight();
@@ -180,8 +189,8 @@ public class ImageProcessor {
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
-        float   centerx = 0;  //形心的x坐标
-        float   centery = 0; //形心的y坐标
+        float centerx = 0;  //形心的x坐标
+        float centery = 0; //形心的y坐标
 
 
         for (int i = 0; i < width; i++) {
@@ -206,9 +215,9 @@ public class ImageProcessor {
         pointF.y = centery;
 
 
-        if (redNum<10){
-            pointF.x = (float)-2.0;
-            pointF.y = (float)-2.0;
+        if (redNum < 10) {
+            pointF.x = (float) -2.0;
+            pointF.y = (float) -2.0;
 
         }
         return pointF;
@@ -219,10 +228,11 @@ public class ImageProcessor {
      * 当某个黑点周围8个点有5个红点，就把该点改为红色
      * 防止红色板块中出现黑斑
      * 进行二次迭代
-     * @param bmp  处理过的红黑图像
-     * @return   去除黑色斑点的红黑图像
+     *
+     * @param bmp 处理过的红黑图像
+     * @return 去除黑色斑点的红黑图像
      */
-    static public  Bitmap nineCorrect(Bitmap bmp) {
+    static public Bitmap nineCorrect(Bitmap bmp) {
         int width = bmp.getWidth();
         int height = bmp.getHeight();
         int pixColor = 0; //像素信息
@@ -254,7 +264,7 @@ public class ImageProcessor {
 
                             for (int m = -1; m < 2; m++) {
 
-                                if (pixelR[(j+ m) * width + i+k] == 255) { //红色
+                                if (pixelR[(j + m) * width + i + k] == 255) { //红色
                                     redNum = redNum + 1;
                                 }
                             }
@@ -283,9 +293,9 @@ public class ImageProcessor {
     /**
      * @param bmp 需要用九宫格矫正的红黑图像
      * @param n   迭代利用nineCorrect进行矫正的次数
-     * @return   矫正后的红黑图
+     * @return 矫正后的红黑图
      */
-    static public  Bitmap IterNineCorrect(Bitmap bmp, int n) {
+    static public Bitmap IterNineCorrect(Bitmap bmp, int n) {
         for (int i = 0; i < n; i++) {
             bmp = nineCorrect(bmp);
         }
@@ -299,7 +309,7 @@ public class ImageProcessor {
      * 然后
      *
      * @param bmp   摄像头采集的图像
-     * @return      处理后的图像
+     * @return 处理后的图像
      */
 //    public Bitmap imagePreProces(Bitmap bmp)
 //    {
@@ -307,10 +317,9 @@ public class ImageProcessor {
 //    }
 
     /**
-     *
      * @param pointf 来自函数centroid: 路径中心相对于图片中心的位置，x,y均为[-1,1]之间，
      */
-    static public  void keepToPath (PointF pointf) {
+    static public void keepToPath(PointF pointf) {
         double x = pointf.x;
         double y = pointf.y;
         if (x > 0) {
@@ -326,108 +335,174 @@ public class ImageProcessor {
     }
 
 
-
     /**
-     *
-     *
      * @param bmp
      * @return
      */
-  static public Bitmap hsvFilter(Bitmap bmp)
-  {
-int width = bmp.getWidth();
-      int height = bmp.getHeight();
-      int[] pixelR = new int[width * height];  //R通道
-      int[] pixelG = new int[width * height];  //G通道
-      int[] pixelB = new int[width * height];  //B通道
-      float[] hue=new float[width * height];  //HSV. hsv[0] is Hue [0 .. 360)
-      float[] satu=new float[width * height]; //hsv[1] is Saturation [0...1]
-      float[] val=new float[[width * height];  //hsv[2] is Value [0...1]
+    static public Bitmap hsvFilter(Bitmap bmp) {
+        Bitmap bitmap = Bitmap.createBitmap(bmp);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
 
-      int[] pixels = new int[width * height];   //记录每个像素点的rgb值
-      int pixR = 0;
-      int pixG = 0;
-      int pixB = 0;
-      int pixColor = 0;
-      float[] hsv=new float[3];
-      bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
+        Mat origin = new Mat();
+        Utils.bitmapToMat(bitmap, origin);
 
-      //
-      for (int i = 0, length = height - 1; i < length; i++) {
-          for (int j = 0, len = width - 1; j < len; j++) {
+        Mat originHSV = new Mat();
+        Imgproc.cvtColor(origin, originHSV, Imgproc.COLOR_BGR2HSV, 3);
 
-              pixColor = pixels[i * width + j];
-              pixR = Color.red(pixColor);
-              pixG = Color.green(pixColor);
-              pixB = Color.blue(pixColor);
-              pixelR[i * width + j] = pixR;
-              pixelG[i * width + j] = pixG;
-              pixelB[i * width + j] = pixB;
-              //convert form RGB to HSV
-              Color.RGBToHSV(pixR,pixG,pixB,hsv);
-              hue[i*width+j] = hsv[0];
-              satu[i*width+j] = hsv[1];
-              val[i*width+j] = hsv[2];
+        List<Mat> HSV = new ArrayList<Mat>(3);
+        Core.split(origin, HSV);
+        Mat originH = HSV.get(0);
+        Mat originS = HSV.get(1);
+        Mat originV = HSV.get(2);
 
+        Log.d(LOG_TAG, "Mat" + originHSV);
+        System.out.println(originHSV);
 
-          }
-      }
-      MatOfFloat matHue= new MatOfFloat(hue);
-      MatOfFloat matHue1= new MatOfFloat(hue);
-      MatOfFloat matHue2= new MatOfFloat(hue);
-      float[] hue1;
-      float[] hue2;
+//        for (int i = 0; i < originH.height(); i++){
+//            for (int j = 0; j < originH.width(); j++){
+//                double[] h = originH.get(i, j);
+//                System.out.print(h[0]+", ");
+//            }
+//        }
 
+        Mat H1 = new Mat();
+        Imgproc.threshold(originH, H1, 25, 90, Imgproc.THRESH_BINARY);
+        Mat H2 = new Mat();
+        Imgproc.threshold(originH, H2, 155, 90, Imgproc.THRESH_BINARY_INV);
+        for (int i = 0; i < H1.height(); i++){
+            for (int j = 0; j < H1.width(); j++){
+                double[] h = H2.get(i, j);
+                if (h[0] == 0)
+                    H1.put(i, j, 0);
+            }
+        }
 
-      //MatOfFloat dst1 = new MatOfFloat();
+        Mat S = new Mat();
+        Imgproc.threshold(originS, S, 100, 255, Imgproc.THRESH_BINARY);
 
-      Imgproc.threshold(matHue1, matHue, 50, 180, Imgproc.THRESH_BINARY);//  低通滤波
-      Imgproc.threshold(matHue2, matHue1,310, 180, Imgproc.THRESH_BINARY_INV);//高通滤波
-      //选取合适的频段，
-      //以达到带通滤波的目的
-      for(int i=1;i<width*height;i++){
-          hue1=matHue1.toArray();
-          hue2=matHue1.toArray();
-          if(hue1[i]==180 &&  hue2[i]==180){
-              hue[i]=180;
-          }
-          else {
-            hue[i]=0;
-          }
-      }
+        Mat V = new Mat();
+        Imgproc.threshold(originV, V, 100, 255, Imgproc.THRESH_BINARY);
 
+        for (int i = 0; i < H1.height(); i++){
+            for (int j = 0; j < H1.width(); j++){
+                double[] h = H1.get(i,j);
+                double[] s = S.get(i, j);
+                double[] v = V.get(i, j);
+                if (h[0] == 90 || s[0] == 0 || v[0] == 0){
+                    H1.put(i, j, 90);
+                    S.put(i, j, 0);
+                    V.put(i, j, 0);
+                }
+            }
+        }
 
-    //饱和度低通滤波
-      MatOfFloat matSatu= new MatOfFloat(satu);
-      Imgproc.threshold(matSatu,matSatu,0.4, 1, Imgproc.THRESH_BINARY);//  低通滤波
-      satu=matSatu.toArray();
-      //亮度低通滤波
-      MatOfFloat matVal = new MatOfFloat(val);
-      Imgproc.threshold(matVal,matVal,0.4, 1, Imgproc.THRESH_BINARY);//  低通滤波
-      val=matVal.toArray();
+        List<Mat> processedHSV = new ArrayList<>();
+        processedHSV.add(H1);
+        processedHSV.add(S);
+        processedHSV.add(V);
 
-    //将hsv格式转换为rgb
-
-      for(int i=0;i<width*height;i++)
-      {
-          hsv[0]=hue[i];
-          hsv[1]=satu[i];
-          hsv[2]=val[i];
-
-         int color= Color.HSVToColor(hsv);
-          pixelR[i]=Color.red(color);
-          pixelG[i]=Color.green(color);
-          pixelB[i]=Color.blue(color);
-          pixels[i]=Color.argb(255, pixelR[i], pixelG[i], pixelB[i])
-      }
-    // Imgproc.erode(pixelR,pixelR,null);
-      bmp.setPixels(pixels, 0, width, 0, 0, width, height);
-        Mat mat = new Mat();
-      mat.
-
-
-
-
-
-  }
+        Mat ansMat = new Mat();
+        Core.merge(processedHSV, ansMat);
+        Mat rgbMat = new Mat();
+        Imgproc.cvtColor(ansMat, rgbMat, Imgproc.COLOR_HSV2RGB, 4);
+        Utils.matToBitmap(ansMat, bitmap);
+        return bitmap;
     }
+
+}
+//        int width = bmp.getWidth();
+//              int height = bmp.getHeight();
+//              int[] pixelR = new int[width * height];  //R通道
+//              int[] pixelG = new int[width * height];  //G通道
+//              int[] pixelB = new int[width * height];  //B通道
+//              float[] hue=new float[width * height];  //HSV. hsv[0] is Hue [0 .. 360)
+//              float[] satu=new float[width * height]; //hsv[1] is Saturation [0...1]
+//              float[] val=new float[[width * height];  //hsv[2] is Value [0...1]
+//
+//              int[] pixels = new int[width * height];   //记录每个像素点的rgb值
+//              int pixR = 0;
+//              int pixG = 0;
+//              int pixB = 0;
+//              int pixColor = 0;
+//              float[] hsv=new float[3];
+//              bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
+//
+//              //
+//              for (int i = 0, length = height - 1; i < length; i++) {
+//                  for (int j = 0, len = width - 1; j < len; j++) {
+//
+//                      pixColor = pixels[i * width + j];
+//                      pixR = Color.red(pixColor);
+//                      pixG = Color.green(pixColor);
+//                      pixB = Color.blue(pixColor);
+//                      pixelR[i * width + j] = pixR;
+//                      pixelG[i * width + j] = pixG;
+//                      pixelB[i * width + j] = pixB;
+//                      //convert form RGB to HSV
+//                      Color.RGBToHSV(pixR,pixG,pixB,hsv);
+//                      hue[i*width+j] = hsv[0];
+//                      satu[i*width+j] = hsv[1];
+//                      val[i*width+j] = hsv[2];
+//
+//
+//                  }
+//              }
+//              MatOfFloat matHue= new MatOfFloat(hue);
+//              MatOfFloat matHue1= new MatOfFloat(hue);
+//              MatOfFloat matHue2= new MatOfFloat(hue);
+//              float[] hue1;
+//              float[] hue2;
+//
+//
+//              //MatOfFloat dst1 = new MatOfFloat();
+//
+//              Imgproc.threshold(matHue1, matHue, 50, 180, Imgproc.THRESH_BINARY);//  低通滤波
+//              Imgproc.threshold(matHue2, matHue1,310, 180, Imgproc.THRESH_BINARY_INV);//高通滤波
+//              //选取合适的频段，
+//              //以达到带通滤波的目的
+//              for(int i=1;i<width*height;i++){
+//                  hue1=matHue1.toArray();
+//                  hue2=matHue1.toArray();
+//                  if(hue1[i]==180 &&  hue2[i]==180){
+//                      hue[i]=180;
+//                  }
+//                  else {
+//                    hue[i]=0;
+//                  }
+//              }
+//
+//
+//            //饱和度低通滤波
+//              MatOfFloat matSatu= new MatOfFloat(satu);
+//              Imgproc.threshold(matSatu,matSatu,0.4, 1, Imgproc.THRESH_BINARY);//  低通滤波
+//              satu=matSatu.toArray();
+//              //亮度低通滤波
+//              MatOfFloat matVal = new MatOfFloat(val);
+//              Imgproc.threshold(matVal,matVal,0.4, 1, Imgproc.THRESH_BINARY);//  低通滤波
+//              val=matVal.toArray();
+//
+//            //将hsv格式转换为rgb
+//
+//              for(int i=0;i<width*height;i++)
+//              {
+//                  hsv[0]=hue[i];
+//                  hsv[1]=satu[i];
+//                  hsv[2]=val[i];
+//
+//                 int color= Color.HSVToColor(hsv);
+//                  pixelR[i]=Color.red(color);
+//                  pixelG[i]=Color.green(color);
+//                  pixelB[i]=Color.blue(color);
+//                  pixels[i]=Color.argb(255, pixelR[i], pixelG[i], pixelB[i])
+//              }
+//            // Imgproc.erode(pixelR,pixelR,null);
+//              bmp.setPixels(pixels, 0, width, 0, 0, width, height);
+//                Mat mat = new Mat();
+//              mat.
+//
+//
+//
+//
+//
+//          }

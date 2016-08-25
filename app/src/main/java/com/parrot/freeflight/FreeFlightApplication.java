@@ -6,6 +6,10 @@ import android.util.Log;
 
 import com.parrot.freeflight.settings.ApplicationSettings;
 
+import org.opencv.android.InstallCallbackInterface;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+
 public class FreeFlightApplication 
 	extends Application 
 	
