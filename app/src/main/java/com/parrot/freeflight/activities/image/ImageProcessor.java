@@ -11,6 +11,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Size;
 
@@ -336,79 +337,100 @@ public class ImageProcessor {
 
 
     /**
-     * @param bmp
+     * @param bitmap
      * @return
      */
-    static public Bitmap hsvFilter(Bitmap bmp) {
-        Bitmap bitmap = Bitmap.createBitmap(bmp);
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
+    static  public Bitmap hsvFilter(Bitmap bitmap){
         Mat origin = new Mat();
         Utils.bitmapToMat(bitmap, origin);
 
         Mat originHSV = new Mat();
         Imgproc.cvtColor(origin, originHSV, Imgproc.COLOR_BGR2HSV, 3);
 
-        List<Mat> HSV = new ArrayList<Mat>(3);
-        Core.split(origin, HSV);
-        Mat originH = HSV.get(0);
-        Mat originS = HSV.get(1);
-        Mat originV = HSV.get(2);
+        Mat lower = new Mat();
+        Mat upper = new Mat();
+        Core.inRange(originHSV, new Scalar(0, 50, 50), new Scalar(60, 255, 255), lower);
+        Core.inRange(originHSV, new Scalar(120, 50, 50), new Scalar(179, 255, 255), upper);
 
-        Log.d(LOG_TAG, "Mat" + originHSV);
-        System.out.println(originHSV);
+        Mat red = new Mat();
+        Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);
+        Imgproc.GaussianBlur(red, red, new Size(9, 9), 2, 2);
 
-//        for (int i = 0; i < originH.height(); i++){
-//            for (int j = 0; j < originH.width(); j++){
-//                double[] h = originH.get(i, j);
-//                System.out.print(h[0]+", ");
-//            }
-//        }
-
-        Mat H1 = new Mat();
-        Imgproc.threshold(originH, H1, 25, 90, Imgproc.THRESH_BINARY);
-        Mat H2 = new Mat();
-        Imgproc.threshold(originH, H2, 155, 90, Imgproc.THRESH_BINARY_INV);
-        for (int i = 0; i < H1.height(); i++){
-            for (int j = 0; j < H1.width(); j++){
-                double[] h = H2.get(i, j);
-                if (h[0] == 0)
-                    H1.put(i, j, 0);
-            }
-        }
-
-        Mat S = new Mat();
-        Imgproc.threshold(originS, S, 100, 255, Imgproc.THRESH_BINARY);
-
-        Mat V = new Mat();
-        Imgproc.threshold(originV, V, 100, 255, Imgproc.THRESH_BINARY);
-
-        for (int i = 0; i < H1.height(); i++){
-            for (int j = 0; j < H1.width(); j++){
-                double[] h = H1.get(i,j);
-                double[] s = S.get(i, j);
-                double[] v = V.get(i, j);
-                if (h[0] == 90 || s[0] == 0 || v[0] == 0){
-                    H1.put(i, j, 90);
-                    S.put(i, j, 0);
-                    V.put(i, j, 0);
-                }
-            }
-        }
-
-        List<Mat> processedHSV = new ArrayList<>();
-        processedHSV.add(H1);
-        processedHSV.add(S);
-        processedHSV.add(V);
-
-        Mat ansMat = new Mat();
-        Core.merge(processedHSV, ansMat);
-        Mat rgbMat = new Mat();
-        Imgproc.cvtColor(ansMat, rgbMat, Imgproc.COLOR_HSV2RGB, 4);
-        Utils.matToBitmap(ansMat, bitmap);
+        Utils.matToBitmap(red, bitmap);
         return bitmap;
     }
+//    static public Bitmap hsvFilter(Bitmap bmp) {
+//        Bitmap bitmap = Bitmap.createBitmap(bmp);
+//        int width = bitmap.getWidth();
+//        int height = bitmap.getHeight();
+//
+//        Mat origin = new Mat();
+//        Utils.bitmapToMat(bitmap, origin);
+//
+//        Mat originHSV = new Mat();
+//        Imgproc.cvtColor(origin, originHSV, Imgproc.COLOR_BGR2HSV, 3);
+//
+//        List<Mat> HSV = new ArrayList<Mat>(3);
+//        Core.split(origin, HSV);
+//        Mat originH = HSV.get(0);
+//        Mat originS = HSV.get(1);
+//        Mat originV = HSV.get(2);
+//
+//        Log.d(LOG_TAG, "Mat" + originHSV);
+//        System.out.println(originHSV);
+//
+////        for (int i = 0; i < originH.height(); i++){
+////            for (int j = 0; j < originH.width(); j++){
+////                double[] h = originH.get(i, j);
+////                System.out.print(h[0]+", ");
+////            }
+////        }
+//
+//        Mat H1 = new Mat();
+//        Imgproc.threshold(originH, H1, 25, 90, Imgproc.THRESH_BINARY);
+//        Mat H2 = new Mat();
+//        Imgproc.threshold(originH, H2, 155, 90, Imgproc.THRESH_BINARY_INV);
+//        for (int i = 0; i < H1.height(); i++){
+//            for (int j = 0; j < H1.width(); j++){
+//                double[] h = H2.get(i, j);
+//                if (h[0] == 0)
+//                    H1.put(i, j, 0);
+//            }
+//        }
+//
+//        Mat S = new Mat();
+//        Imgproc.threshold(originS, S, 100, 255, Imgproc.THRESH_BINARY);
+//
+//        Mat V = new Mat();
+//        Imgproc.threshold(originV, V, 100, 255, Imgproc.THRESH_BINARY);
+//
+//
+//
+//        for (int i = 0; i < H1.height(); i++){
+//            for (int j = 0; j < H1.width(); j++){
+//                double[] h = H1.get(i,j);
+//                double[] s = S.get(i, j);
+//                double[] v = V.get(i, j);
+//                if (h[0] == 90 || s[0] == 0 || v[0] == 0){
+//                    H1.put(i, j, 90);
+//                    S.put(i, j, 0);
+//                    V.put(i, j, 0);
+//                }
+//            }
+//        }
+//
+//        List<Mat> processedHSV = new ArrayList<>();
+//        processedHSV.add(H1);
+//        processedHSV.add(S);
+//        processedHSV.add(V);
+//
+//        Mat ansMat = new Mat();
+//        Core.merge(processedHSV, ansMat);
+//        Mat rgbMat = new Mat();
+//        Imgproc.cvtColor(ansMat, rgbMat, Imgproc.COLOR_HSV2RGB, 4);
+//        Utils.matToBitmap(ansMat, bitmap);
+//        return bitmap;
+//    }
 
 }
 //        int width = bmp.getWidth();
