@@ -349,8 +349,8 @@ public class ImageProcessor {
 
         Mat lower = new Mat();
         Mat upper = new Mat();
-        Core.inRange(originHSV, new Scalar(0, 80, 60), new Scalar(50, 255, 255), lower);
-        Core.inRange(originHSV, new Scalar(120, 80, 60), new Scalar(179, 255, 255), upper);
+        Core.inRange(originHSV, new Scalar(0, 80, 50), new Scalar(50, 255, 255), lower);
+        Core.inRange(originHSV, new Scalar(120, 80, 50), new Scalar(179, 255, 255), upper);
 
         Mat red = new Mat();
         Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);

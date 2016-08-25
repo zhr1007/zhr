@@ -5,6 +5,10 @@ import android.util.Log;
 import com.parrot.freeflight.activities.image.ImageToCommand;
 import com.parrot.freeflight.service.DroneControlService;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -49,7 +53,23 @@ public class GameController {
                 }
             }
         });
-        controlThread.start();
+
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, gameActivity, new BaseLoaderCallback(gameActivity) {
+            @Override
+            public void onManagerConnected(int status) {
+                switch (status) {
+                    case LoaderCallbackInterface.SUCCESS:
+                    {
+                        Log.i(LOG_TAG, "OpenCV loaded successfully");
+                        controlThread.start();
+                    } break;
+                    default:
+                    {
+                        super.onManagerConnected(status);
+                    } break;
+                }
+            }
+        });
     }
 
     public void stop(){

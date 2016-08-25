@@ -41,7 +41,7 @@ public class ImageToCommand {
         Bitmap bitmap = loadImage();
 
         // use CJM
-        bitmap = ImageProcessor.showPicRedBlack(bitmap);
+        bitmap = ImageProcessor.hsvFilter(bitmap);
         PointF pointF = ImageProcessor.centroid(bitmap);
 
         if (pointF.x < -1 && pointF.y < -1){
