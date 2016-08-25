@@ -45,22 +45,55 @@ public class GameController {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                controlService.moveForward((float) 0.2); // slowly move forward
-                while (ardroneStatus == 0){
+                float power = 0.3f;
+//                controlService.moveForward(power); // slowly move forward
+                while (ardroneStatus == 0 && !Thread.currentThread().isInterrupted()){
+
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        return;
+                    }
 //                    controlService.takePhoto();
 //                    controlService.moveForward(1.0f);
                     GameCommand command = imageToCommand.getCommand();
                     controlService.setProgressiveCommandEnabled(true);
-                    if (command.yaw != 0) {
-                        controlService.setProgressiveCommandCombinedYawEnabled(true);
-                        controlService.setYaw(command.yaw);
-                        controlService.moveForward(0.02f);
-//                        controlService.setRoll(command.yaw);
+                    if (command.command.equals("stable")){
+                        controlService.setProgressiveCommandEnabled(false);
+                        controlService.setYaw(0.0f);
+                        controlService.setRoll(0.0f);
+                        controlService.setPitch(0.0f);
+//                        controlService.setPitch(0.0f);
                     }
-                    else {
+                    else if (command.pitch != 0){
+                        controlService.setProgressiveCommandEnabled(true);
                         controlService.setProgressiveCommandCombinedYawEnabled(false);
                         controlService.setYaw(0.0f);
-                        controlService.moveForward(0.02f);
+                        controlService.setRoll(0.0f);
+                        controlService.setPitch(command.pitch);
+                    }
+                    else if (command.roll != 0){
+                        controlService.setProgressiveCommandEnabled(true);
+                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+                        controlService.setYaw(0.0f);
+                        controlService.moveForward(0.0f);
+                        controlService.setRoll(command.roll);
+                    }
+                    else if (command.yaw != 0){
+                        controlService.setProgressiveCommandEnabled(true);
+                        controlService.setProgressiveCommandCombinedYawEnabled(true);
+                        controlService.setRoll(0.0f);
+                        controlService.moveForward(0.0f);
+                        controlService.setYaw(command.yaw);
+                    }
+                    else {
+                        controlService.setProgressiveCommandEnabled(true);
+                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+                        controlService.setRoll(0.0f);
+                        controlService.setYaw(0.0f);
+//                        controlService.moveForward(0.0f);
+                        controlService.moveForward(power);
                     }
                 }
             }
@@ -87,5 +120,6 @@ public class GameController {
     public void stop(){
         controlService.triggerTakeOff();
         ardroneStatus = -1;
+        controlThread.interrupt();
     }
 }

@@ -711,7 +711,7 @@ public class GameActivity
         Log.d(TAG, "GameActivity destroyed");
         System.gc();
 
-        gameController.stop();
+//        gameController.stop();
     }
 
     private void registerReceivers()
@@ -785,6 +785,7 @@ public class GameActivity
 
         System.gc();
         super.onPause();
+        gameController.stop();
     }
 
     /**
