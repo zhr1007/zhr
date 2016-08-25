@@ -46,6 +46,8 @@ public class ImageProcessor {
 
         //HSV filter
         bitmap = hsvFilter(bitmap);
+
+      //  Log.d(LOG_TAG,"enter");
         return bitmap;
     }
 
@@ -178,6 +180,7 @@ public class ImageProcessor {
      * 输入：经过处理后的二色图像（红与黑）
      * 以图形中心为坐标中心，x轴向右，y轴向上，各自范围[-1,1]
      * 返回路径中心的坐标，[-1,1]之间
+     * 若返回[-2,-2]，表示图像中白点少于100个，摄像机未拍到路径
      */
 
     static public PointF centroid(Bitmap bmp) {
@@ -186,37 +189,41 @@ public class ImageProcessor {
         int height = bmp.getHeight();
         int pixColor = 0; //像素信息
         int pixR = 0;
-        int redNum = 0; //红黑图中，红点的总个数
+        int pixG = 0;
+        int pixB = 0;
+        int whiteNum = 0; //黑白图中，红点的总个数
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
-        float centerx = 0;  //形心的x坐标
-        float centery = 0; //形心的y坐标
+        float centerX = 0;  //形心的x坐标
+        float centerY = 0; //形心的y坐标
 
 
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
 
-                pixColor = pixels[j * width + i];
+                pixColor = pixels[i * width + j];
                 pixR = Color.red(pixColor);
+                pixG = Color.green(pixColor);
+                pixB = Color.blue(pixColor);
 
                 //如果红色通道大于0，则为红色，则累加centerx，centery,
                 //否则为黑色，不累加
-                if (pixR > 0) {
-                    redNum = redNum + 1;
-                    centerx += centerx;
-                    centery += centery;
+                if (pixR==255  && pixG==255 &&pixB==255) {
+                    whiteNum = whiteNum + 1;
+                    centerX += j;
+                    centerY += i;
                 }
 
             }
         }
-        centerx = 2 * centerx / redNum / width - 1;
-        centery = 2 * centery / redNum / height - 1;
-        pointF.x = centerx;
-        pointF.y = centery;
+        centerX = 2 * centerX /whiteNum / width - 1;
+        centerY = 2 * centerY /whiteNum / height - 1;
+        pointF.x = centerX;
+        pointF.y = centerY;
 
 
-        if (redNum < 10) {
+        if (whiteNum < 100) {
             pointF.x = (float) -2.0;
             pointF.y = (float) -2.0;
 
