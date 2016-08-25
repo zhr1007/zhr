@@ -48,7 +48,7 @@ public class ImageProcessor {
         bitmap = hsvFilter(bitmap);
         PointF[] centers = centroid(bitmap);
         PointF center = centers[0];
-        Log.d(LOG_TAG,"center:" + center.x + "," + center.y);
+        Log.d(LOG_TAG, "center:" + center.x + "," + center.y);
         return bitmap;
     }
 
@@ -58,122 +58,122 @@ public class ImageProcessor {
      * @param bmp
      * @return，
      */
-    static private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
-        long start = System.currentTimeMillis();
-        // 拉普拉斯矩阵
-        int[] laplacian = new int[]{-1, -1, -1, -1, 9, -1, -1, -1, -1};
-
-        int width = bmp.getWidth();
-        int height = bmp.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-
-        int pixR = 0;
-        int pixG = 0;
-        int pixB = 0;
-
-        int pixColor = 0;
-
-        int newR = 0;
-        int newG = 0;
-        int newB = 0;
-
-        int idx = 0;
-        float alpha = 0.3F;
-        int[] pixels = new int[width * height];
-        bmp.getPixels(pixels, 0, width, 0, 0, width, height);
-        for (int i = 1, length = height - 1; i < length; i++) {
-            for (int k = 1, len = width - 1; k < len; k++) {
-                idx = 0;
-                for (int m = -1; m <= 1; m++) {
-                    for (int n = -1; n <= 1; n++) {
-                        pixColor = pixels[(i + n) * width + k + m];
-                        pixR = Color.red(pixColor);
-                        pixG = Color.green(pixColor);
-                        pixB = Color.blue(pixColor);
-
-                        newR = newR + (int) (pixR * laplacian[idx] * alpha);
-                        newG = newG + (int) (pixG * laplacian[idx] * alpha);
-                        newB = newB + (int) (pixB * laplacian[idx] * alpha);
-                        idx++;
-                    }
-                }
-
-                newR = Math.min(255, Math.max(0, newR));
-                newG = Math.min(255, Math.max(0, newG));
-                newB = Math.min(255, Math.max(0, newB));
-
-                pixels[i * width + k] = Color.argb(255, newR, newG, newB);
-                newR = 0;
-                newG = 0;
-                newB = 0;
-            }
-        }
-
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-        long end = System.currentTimeMillis();
-        Log.d("may", "used time=" + (end - start));
-        return bitmap;
-    }
+//    static private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
+//        long start = System.currentTimeMillis();
+//        // 拉普拉斯矩阵
+//        int[] laplacian = new int[]{-1, -1, -1, -1, 9, -1, -1, -1, -1};
+//
+//        int width = bmp.getWidth();
+//        int height = bmp.getHeight();
+//        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+//
+//        int pixR = 0;
+//        int pixG = 0;
+//        int pixB = 0;
+//
+//        int pixColor = 0;
+//
+//        int newR = 0;
+//        int newG = 0;
+//        int newB = 0;
+//
+//        int idx = 0;
+//        float alpha = 0.3F;
+//        int[] pixels = new int[width * height];
+//        bmp.getPixels(pixels, 0, width, 0, 0, width, height);
+//        for (int i = 1, length = height - 1; i < length; i++) {
+//            for (int k = 1, len = width - 1; k < len; k++) {
+//                idx = 0;
+//                for (int m = -1; m <= 1; m++) {
+//                    for (int n = -1; n <= 1; n++) {
+//                        pixColor = pixels[(i + n) * width + k + m];
+//                        pixR = Color.red(pixColor);
+//                        pixG = Color.green(pixColor);
+//                        pixB = Color.blue(pixColor);
+//
+//                        newR = newR + (int) (pixR * laplacian[idx] * alpha);
+//                        newG = newG + (int) (pixG * laplacian[idx] * alpha);
+//                        newB = newB + (int) (pixB * laplacian[idx] * alpha);
+//                        idx++;
+//                    }
+//                }
+//
+//                newR = Math.min(255, Math.max(0, newR));
+//                newG = Math.min(255, Math.max(0, newG));
+//                newB = Math.min(255, Math.max(0, newB));
+//
+//                pixels[i * width + k] = Color.argb(255, newR, newG, newB);
+//                newR = 0;
+//                newG = 0;
+//                newB = 0;
+//            }
+//        }
+//
+//        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+//        long end = System.currentTimeMillis();
+//        Log.d("may", "used time=" + (end - start));
+//        return bitmap;
+//    }
 
     /**
      * 判断红色像素点，单独显示，其他点显示为黑色
      */
 
-    static public Bitmap showPicRedBlack(Bitmap bmp) {
-        int pixR = 0;
-        int pixG = 0;
-        int pixB = 0;
-        double disttemp = 0;                         //临时变量，距离值
-        int pixColor = 0;
-        int width = bmp.getWidth();
-        int height = bmp.getHeight();
-        // int[] dist = new int[width * height];    //计算每个像素点与标准红色的欧氏距离
-        int RedDistThreshold = 80;               //若距离大于此阈值，则全设为黑色，否则原样输出
-        int[] pixelR = new int[width * height];  //R通道
-        int[] pixelG = new int[width * height];  //G通道
-        int[] pixelB = new int[width * height];  //B通道
-        int[] pixels = new int[width * height];   //记录每个像素点的rgb值
-        //  Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-        bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
-
-        /**
-         * for循环，依次读取图像的R,G,B 通道
-         * 并计算与标准红色距离
-         *大于阈值，设为黑色
-         */
-
-        for (int i = 0, length = height - 1; i < length; i++) {
-            for (int j = 0, len = width - 1; j < len; j++) {
-
-                pixColor = pixels[i * width + j];
-                pixR = Color.red(pixColor);
-                pixG = Color.green(pixColor);
-                pixB = Color.blue(pixColor);
-                pixelR[i * width + j] = pixR;
-                pixelG[i * width + j] = pixG;
-                pixelB[i * width + j] = pixB;
-                //计算与红色的欧氏距离
-                disttemp = (255 - pixR) * (255 - pixR) + pixG * pixG + pixB * pixB;
-                disttemp = Math.sqrt(disttemp);
-                //与红色距离大的设为黑色
-                if (disttemp > RedDistThreshold) {
-                    pixelR[i * width + j] = 0;
-                    pixelG[i * width + j] = 0;
-                    pixelB[i * width + j] = 0;
-
-
-                }
-
-                //将修改后的三个通道合并
-                pixels[i * width + j] = Color.argb(255, pixelR[i * width + j], pixelG[i * width + j], pixelB[i * width + j]);
-            }
-
-        }
-        //返回修改后的图像
-        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
-
-        return bmp;
-    }
+//    static public Bitmap showPicRedBlack(Bitmap bmp) {
+//        int pixR = 0;
+//        int pixG = 0;
+//        int pixB = 0;
+//        double disttemp = 0;                         //临时变量，距离值
+//        int pixColor = 0;
+//        int width = bmp.getWidth();
+//        int height = bmp.getHeight();
+//        // int[] dist = new int[width * height];    //计算每个像素点与标准红色的欧氏距离
+//        int RedDistThreshold = 80;               //若距离大于此阈值，则全设为黑色，否则原样输出
+//        int[] pixelR = new int[width * height];  //R通道
+//        int[] pixelG = new int[width * height];  //G通道
+//        int[] pixelB = new int[width * height];  //B通道
+//        int[] pixels = new int[width * height];   //记录每个像素点的rgb值
+//        //  Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+//        bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
+//
+//        /**
+//         * for循环，依次读取图像的R,G,B 通道
+//         * 并计算与标准红色距离
+//         *大于阈值，设为黑色
+//         */
+//
+//        for (int i = 0, length = height - 1; i < length; i++) {
+//            for (int j = 0, len = width - 1; j < len; j++) {
+//
+//                pixColor = pixels[i * width + j];
+//                pixR = Color.red(pixColor);
+//                pixG = Color.green(pixColor);
+//                pixB = Color.blue(pixColor);
+//                pixelR[i * width + j] = pixR;
+//                pixelG[i * width + j] = pixG;
+//                pixelB[i * width + j] = pixB;
+//                //计算与红色的欧氏距离
+//                disttemp = (255 - pixR) * (255 - pixR) + pixG * pixG + pixB * pixB;
+//                disttemp = Math.sqrt(disttemp);
+//                //与红色距离大的设为黑色
+//                if (disttemp > RedDistThreshold) {
+//                    pixelR[i * width + j] = 0;
+//                    pixelG[i * width + j] = 0;
+//                    pixelB[i * width + j] = 0;
+//
+//
+//                }
+//
+//                //将修改后的三个通道合并
+//                pixels[i * width + j] = Color.argb(255, pixelR[i * width + j], pixelG[i * width + j], pixelB[i * width + j]);
+//            }
+//
+//        }
+//        //返回修改后的图像
+//        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
+//
+//        return bmp;
+//    }
 
     /**
      * 路径在图像中一般呈平行四边形，计算形心的位置
@@ -186,7 +186,7 @@ public class ImageProcessor {
      */
 
     static public PointF[] centroid(Bitmap bmp) {
-      //  PointF pointF = new PointF();
+        //  PointF pointF = new PointF();
         int width = bmp.getWidth();
         int height = bmp.getHeight();
         int pixColor = 0; //像素信息
@@ -203,9 +203,9 @@ public class ImageProcessor {
         double centerXdown = 0;  //形心的x坐标
         double centerYup = 0; //形心的y坐标
         double centerYdown = 0; //形心的y坐标
-         int   halfHeight= height/2;
+        int halfHeight = height / 2;
 
-        for (int i = 0; i <halfHeight; i++) {
+        for (int i = 0; i < halfHeight; i++) {
             for (int j = 0; j < width; j++) {
 
                 pixColor = pixels[i * width + j];
@@ -215,17 +215,17 @@ public class ImageProcessor {
 
                 //如果红色通道大于0，则为红色，则累加centerx，centery,
                 //否则为黑色，不累加
-                if (pixR==255  && pixG==255 &&pixB==255) {
+                if (pixR == 255 && pixG == 255 && pixB == 255) {
                     whiteUpNum = whiteUpNum + 1;
                     centerXup += j;
-                    centerYup += (height-i);
+                    centerYup += (height - i);
                 }
 
             }
         }
 
-        centerXup = 2 * centerXup/whiteUpNum / width - 1;
-        centerYup = 2 * centerYup /whiteUpNum / height - 1;
+        centerXup = 2 * centerXup / whiteUpNum / width - 1;
+        centerYup = 2 * centerYup / whiteUpNum / height - 1;
         pointFs[0].x = (float) centerXup;
         pointFs[0].y = (float) centerYup;
         if (whiteDownNum < 100) {
@@ -234,7 +234,7 @@ public class ImageProcessor {
 
         }
 
-        for (int i = halfHeight; i <height; i++) {
+        for (int i = halfHeight; i < height; i++) {
             for (int j = 0; j < width; j++) {
 
                 pixColor = pixels[i * width + j];
@@ -244,16 +244,16 @@ public class ImageProcessor {
 
                 //如果红色通道大于0，则为红色，则累加centerx，centery,
                 //否则为黑色，不累加
-                if (pixR==255  && pixG==255 &&pixB==255) {
+                if (pixR == 255 && pixG == 255 && pixB == 255) {
                     whiteDownNum = whiteDownNum + 1;
                     centerXdown += j;
-                    centerYdown +=(height-i) ;
+                    centerYdown += (height - i);
                 }
 
             }
         }
-        centerXdown = 2 * centerXdown /whiteDownNum / width - 1;
-        centerYdown = 2 * centerYdown /whiteDownNum / height - 1;
+        centerXdown = 2 * centerXdown / whiteDownNum / width - 1;
+        centerYdown = 2 * centerYdown / whiteDownNum / height - 1;
         pointFs[1].x = (float) centerXdown;
         pointFs[1].y = (float) centerYdown;
 
@@ -383,7 +383,7 @@ public class ImageProcessor {
      * @param bitmap
      * @return
      */
-    static  public Bitmap hsvFilter(Bitmap bitmap){
+    static public Bitmap hsvFilter(Bitmap bitmap) {
         Mat origin = new Mat();
         Utils.bitmapToMat(bitmap, origin);
 
@@ -402,6 +402,7 @@ public class ImageProcessor {
         Utils.matToBitmap(red, bitmap);
         return bitmap;
     }
+}
 //    static public Bitmap hsvFilter(Bitmap bmp) {
 //        Bitmap bitmap = Bitmap.createBitmap(bmp);
 //        int width = bitmap.getWidth();
@@ -421,14 +422,14 @@ public class ImageProcessor {
 //
 //        Log.d(LOG_TAG, "Mat" + originHSV);
 //        System.out.println(originHSV);
-//
-////        for (int i = 0; i < originH.height(); i++){
-////            for (int j = 0; j < originH.width(); j++){
-////                double[] h = originH.get(i, j);
-////                System.out.print(h[0]+", ");
-////            }
-////        }
-//
+
+//        for (int i = 0; i < originH.height(); i++){
+//            for (int j = 0; j < originH.width(); j++){
+//                double[] h = originH.get(i, j);
+//                System.out.print(h[0]+", ");
+//            }
+//        }
+
 //        Mat H1 = new Mat();
 //        Imgproc.threshold(originH, H1, 25, 90, Imgproc.THRESH_BINARY);
 //        Mat H2 = new Mat();
@@ -474,8 +475,8 @@ public class ImageProcessor {
 //        Utils.matToBitmap(ansMat, bitmap);
 //        return bitmap;
 //    }
-
-}
+//
+//}
 //        int width = bmp.getWidth();
 //              int height = bmp.getHeight();
 //              int[] pixelR = new int[width * height];  //R通道
