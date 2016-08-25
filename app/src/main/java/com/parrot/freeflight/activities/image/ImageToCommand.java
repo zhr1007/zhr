@@ -42,16 +42,16 @@ public class ImageToCommand {
 
         // use CJM
         bitmap = ImageProcessor.hsvFilter(bitmap);
-        PointF pointF = ImageProcessor.centroid(bitmap);
+        PointF pointF = ImageProcessor.centroid(bitmap)[0];
 
         if (pointF.x < -1 && pointF.y < -1){
             command.yaw = 0;
         }
         else if (pointF.x > 0){
-            command.yaw = (float) 0.2;
+            command.yaw = (float) 0.1;
         }
         else if (pointF.x < 0){
-            command.yaw = (float) -0.2;
+            command.yaw = (float) -0.1;
         }
         Log.d(LOG_TAG, "command:"+pointF.x+","+pointF.y+";"+command.yaw);
         return command;

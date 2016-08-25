@@ -249,43 +249,43 @@ public class GameActivity
             public void onChanged(JoystickBase joy, float x, float y)
             {
                 if (droneControlService != null && acceleroEnabled == false && running == true) {
-                    droneControlService.setRoll(x);
-                    droneControlService.setPitch(-y);
+//                    droneControlService.setRoll(x);
+//                    droneControlService.setPitch(-y);
                 }
             }
 
             @Override
             public void onPressed(JoystickBase joy)
             {
-                leftJoyPressed = true;
-
-                if (droneControlService != null) {
-                    droneControlService.setProgressiveCommandEnabled(true);
-
-                    if (combinedYawEnabled && rightJoyPressed) {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
-                    } else {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                    }
-                }
-
-                running = true;
+//                leftJoyPressed = true;
+//
+//                if (droneControlService != null) {
+//                    droneControlService.setProgressiveCommandEnabled(true);
+//
+//                    if (combinedYawEnabled && rightJoyPressed) {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
+//                    } else {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                    }
+//                }
+//
+//                running = true;
             }
 
             @Override
             public void onReleased(JoystickBase joy)
             {
-                leftJoyPressed = false;
-
-                if (droneControlService != null) {
-                    droneControlService.setProgressiveCommandEnabled(false);
-
-                    if (combinedYawEnabled) {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                    }
-                }
-
-                running = false;
+//                leftJoyPressed = false;
+//
+//                if (droneControlService != null) {
+//                    droneControlService.setProgressiveCommandEnabled(false);
+//
+//                    if (combinedYawEnabled) {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                    }
+//                }
+//
+//                running = false;
             }
         };
 
@@ -294,34 +294,34 @@ public class GameActivity
 
             public void onChanged(JoystickBase joy, float x, float y)
             {
-                if (droneControlService != null) {
-                    droneControlService.setGaz(y);
-                    droneControlService.setYaw(x);
-                }
+//                if (droneControlService != null) {
+//                    droneControlService.setGaz(y);
+//                    droneControlService.setYaw(x);
+//                }
             }
 
             @Override
             public void onPressed(JoystickBase joy)
             {
-                rightJoyPressed = true;
-
-                if (droneControlService != null) {
-                    if (combinedYawEnabled && leftJoyPressed) {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
-                    } else {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                    }
-                }
+//                rightJoyPressed = true;
+//
+//                if (droneControlService != null) {
+//                    if (combinedYawEnabled && leftJoyPressed) {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
+//                    } else {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                    }
+//                }
             }
 
             @Override
             public void onReleased(JoystickBase joy)
             {
-                rightJoyPressed = false;
-
-                if (droneControlService != null && combinedYawEnabled) {
-                    droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                }
+//                rightJoyPressed = false;
+//
+//                if (droneControlService != null && combinedYawEnabled) {
+//                    droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                }
             }
         };
     }
@@ -336,9 +336,9 @@ public class GameActivity
             @Override
             public void onValueChanged(float theCurrentValue)
             {
-                if (droneControlService != null) {
-                    droneControlService.setGaz(theCurrentValue);
-                }
+//                if (droneControlService != null) {
+//                    droneControlService.setGaz(theCurrentValue);
+//                }
             }
         });
 
@@ -347,9 +347,9 @@ public class GameActivity
             @Override
             public void onValueChanged(float theCurrentValue)
             {
-                if (droneControlService != null) {
-                    droneControlService.setYaw(theCurrentValue);
-                }
+//                if (droneControlService != null) {
+//                    droneControlService.setYaw(theCurrentValue);
+//                }
             }
         });
 
@@ -358,9 +358,9 @@ public class GameActivity
             @Override
             public void onValueChanged(float theCurrentValue)
             {
-                if (droneControlService != null && acceleroEnabled == false && running) {
-                    droneControlService.setPitch(theCurrentValue);
-                }
+//                if (droneControlService != null && acceleroEnabled == false && running) {
+//                    droneControlService.setPitch(theCurrentValue);
+//                }
             }
         });
 
@@ -369,9 +369,9 @@ public class GameActivity
             @Override
             public void onValueChanged(float theCurrentValue)
             {
-                if (droneControlService != null && acceleroEnabled == false && running) {
-                    droneControlService.setPitch(-theCurrentValue);
-                }
+//                if (droneControlService != null && acceleroEnabled == false && running) {
+//                    droneControlService.setPitch(-theCurrentValue);
+//                }
             }
         });
 
@@ -381,35 +381,35 @@ public class GameActivity
             @Override
             public void onButtonReleased()
             {
-                leftJoyPressed = false;
-
-                if (droneControlService != null) {
-                    droneControlService.setProgressiveCommandEnabled(false);
-
-                    if (combinedYawEnabled) {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                    }
-                }
-
-                running = false;
+//                leftJoyPressed = false;
+//
+//                if (droneControlService != null) {
+//                    droneControlService.setProgressiveCommandEnabled(false);
+//
+//                    if (combinedYawEnabled) {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                    }
+//                }
+//
+//                running = false;
             }
 
             @Override
             public void onButtonPressed()
             {
-                leftJoyPressed = true;
-
-                if (droneControlService != null) {
-                    droneControlService.setProgressiveCommandEnabled(true);
-
-                    if (combinedYawEnabled && rightJoyPressed) {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
-                    } else {
-                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
-                    }
-                }
-
-                running = true;
+//                leftJoyPressed = true;
+//
+//                if (droneControlService != null) {
+//                    droneControlService.setProgressiveCommandEnabled(true);
+//
+//                    if (combinedYawEnabled && rightJoyPressed) {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(true);
+//                    } else {
+//                        droneControlService.setProgressiveCommandCombinedYawEnabled(false);
+//                    }
+//                }
+//
+//                running = true;
             }
         });
 
@@ -1087,56 +1087,56 @@ public class GameActivity
 
     public void onDeviceOrientationChanged(float[] orientation, float magneticHeading, int magnetoAccuracy)
     {
-        if (droneControlService == null) {
-            return;
-        }
-
-        if (magnetoEnabled && magnetoAvailable) {
-            float heading = magneticHeading * 57.2957795f;
-
-            if (screenRotationIndex == 1) {
-                heading += 90.f;
-            }
-
-            droneControlService.setDeviceOrientation((int) heading, 0);
-        } else {
-            droneControlService.setDeviceOrientation(0, 0);
-        }
-
-        if (running == false) {
-            pitchBase = orientation[PITCH];
-            rollBase = orientation[ROLL];
-            droneControlService.setPitch(0);
-            droneControlService.setRoll(0);
-        } else {
-
-            float x = (orientation[PITCH] - pitchBase);
-            float y = (orientation[ROLL] - rollBase);
-
-            if (screenRotationIndex == 0) {
-                // Xoom
-                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
-                    x *= -1;
-                    droneControlService.setPitch(x);
-                    droneControlService.setRoll(y);
-                }
-            } else if (screenRotationIndex == 1) {
-                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
-                    x *= -1;
-                    y *= -1;
-
-                    droneControlService.setPitch(y);
-                    droneControlService.setRoll(x);
-                }
-            } else if (screenRotationIndex == 3) {
-                // google tv
-                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
-
-                    droneControlService.setPitch(y);
-                    droneControlService.setRoll(x);
-                }
-            }
-        }
+//        if (droneControlService == null) {
+//            return;
+//        }
+//
+//        if (magnetoEnabled && magnetoAvailable) {
+//            float heading = magneticHeading * 57.2957795f;
+//
+//            if (screenRotationIndex == 1) {
+//                heading += 90.f;
+//            }
+//
+//            droneControlService.setDeviceOrientation((int) heading, 0);
+//        } else {
+//            droneControlService.setDeviceOrientation(0, 0);
+//        }
+//
+//        if (running == false) {
+//            pitchBase = orientation[PITCH];
+//            rollBase = orientation[ROLL];
+//            droneControlService.setPitch(0);
+//            droneControlService.setRoll(0);
+//        } else {
+//
+//            float x = (orientation[PITCH] - pitchBase);
+//            float y = (orientation[ROLL] - rollBase);
+//
+//            if (screenRotationIndex == 0) {
+//                // Xoom
+//                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
+//                    x *= -1;
+//                    droneControlService.setPitch(x);
+//                    droneControlService.setRoll(y);
+//                }
+//            } else if (screenRotationIndex == 1) {
+//                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
+//                    x *= -1;
+//                    y *= -1;
+//
+//                    droneControlService.setPitch(y);
+//                    droneControlService.setRoll(x);
+//                }
+//            } else if (screenRotationIndex == 3) {
+//                // google tv
+//                if (acceleroEnabled && (Math.abs(x) > ACCELERO_TRESHOLD || Math.abs(y) > ACCELERO_TRESHOLD)) {
+//
+//                    droneControlService.setPitch(y);
+//                    droneControlService.setRoll(x);
+//                }
+//            }
+//        }
     }
 
     public void prepareDialog(SettingsDialog dialog)

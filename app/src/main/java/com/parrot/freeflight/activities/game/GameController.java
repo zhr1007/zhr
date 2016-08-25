@@ -38,7 +38,7 @@ public class GameController {
         controlThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                controlService.switchCamera(); //switch to the camera below
+//                controlService.switchCamera(); //switch to the camera below
                 controlService.triggerTakeOff();
                 try {
                     Thread.sleep(5000);     // wait takeoff
@@ -48,8 +48,20 @@ public class GameController {
                 controlService.moveForward((float) 0.2); // slowly move forward
                 while (ardroneStatus == 0){
 //                    controlService.takePhoto();
+//                    controlService.moveForward(1.0f);
                     GameCommand command = imageToCommand.getCommand();
-                    controlService.setYaw(command.yaw);
+                    controlService.setProgressiveCommandEnabled(true);
+                    if (command.yaw != 0) {
+                        controlService.setProgressiveCommandCombinedYawEnabled(true);
+                        controlService.setYaw(command.yaw);
+                        controlService.moveForward(0.02f);
+//                        controlService.setRoll(command.yaw);
+                    }
+                    else {
+                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+                        controlService.setYaw(0.0f);
+                        controlService.moveForward(0.02f);
+                    }
                 }
             }
         });

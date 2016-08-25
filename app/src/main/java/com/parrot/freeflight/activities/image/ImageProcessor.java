@@ -46,8 +46,9 @@ public class ImageProcessor {
 
         //HSV filter
         bitmap = hsvFilter(bitmap);
-
-      //  Log.d(LOG_TAG,"enter");
+        PointF[] centers = centroid(bitmap);
+        PointF center = centers[0];
+        Log.d(LOG_TAG,"center:" + center.x + "," + center.y);
         return bitmap;
     }
 
@@ -183,7 +184,7 @@ public class ImageProcessor {
      * 若返回[-2,-2]，表示图像中白点少于100个，摄像机未拍到路径
      */
 
-    static public PointF centroid(Bitmap bmp) {
+    static public PointF[] centroid(Bitmap bmp) {
         PointF pointF = new PointF();
         int width = bmp.getWidth();
         int height = bmp.getHeight();
@@ -195,8 +196,8 @@ public class ImageProcessor {
 
         int[] pixels = new int[width * height];
         bmp.getPixels(pixels, 0, width, 0, 0, width, height);   //读取像素信息
-        float centerX = 0;  //形心的x坐标
-        float centerY = 0; //形心的y坐标
+        double centerX = 0;  //形心的x坐标
+        double centerY = 0; //形心的y坐标
 
 
         for (int i = 0; i < height; i++) {
@@ -219,8 +220,8 @@ public class ImageProcessor {
         }
         centerX = 2 * centerX /whiteNum / width - 1;
         centerY = 2 * centerY /whiteNum / height - 1;
-        pointF.x = centerX;
-        pointF.y = centerY;
+        pointF.x = (float) centerX;
+        pointF.y = (float) -centerY;
 
 
         if (whiteNum < 100) {
@@ -228,7 +229,10 @@ public class ImageProcessor {
             pointF.y = (float) -2.0;
 
         }
-        return pointF;
+
+        PointF[] pointFs = new PointF[2];
+        pointFs[0] = pointF;
+        return pointFs;
     }
 
     /**
