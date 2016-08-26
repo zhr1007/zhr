@@ -209,11 +209,8 @@ public class ImageProcessor {
         double centerXdown = 0;  //形心的x坐标
         double centerYup = 0; //形心的y坐标
         double centerYdown = 0; //形心的y坐标
-<<<<<<< HEAD
         int halfHeight = height / 2;
-=======
-        int  halfHeight= height/2;
->>>>>>> master
+
 
         for (int i = 0; i < halfHeight; i++) {
             for (int j = 0; j < width; j++) {
