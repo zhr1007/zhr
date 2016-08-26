@@ -47,12 +47,12 @@ public class ImageProcessor {
         //HSV filter
         bitmap = hsvFilter(bitmap);
         PointF[] centers = centroid(bitmap);
-<<<<<<< HEAD
+
         PointF center = centers[0];
         Log.d(LOG_TAG, "center:" + center.x + "," + center.y);
-=======
+
         Log.d(LOG_TAG,"center:" + centers[0].x + "," + centers[0].y + ";" + centers[1].x + "," + centers[1].y);
->>>>>>> master
+
         return bitmap;
     }
 
