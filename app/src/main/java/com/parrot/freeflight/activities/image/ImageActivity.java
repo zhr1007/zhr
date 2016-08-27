@@ -26,6 +26,7 @@ public class ImageActivity extends Activity {
     ImageView imageBefore;
     ImageView imageAfter;
     Bitmap before;
+    Bitmap after;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,8 @@ public class ImageActivity extends Activity {
                     case LoaderCallbackInterface.SUCCESS:
                     {
                         Log.i(LOG_TAG, "OpenCV loaded successfully");
-                        imageAfter.setImageBitmap(imageProcessor.processImage(before));
+                        after = imageProcessor.processImage(before);
+                        imageAfter.setImageBitmap(after);
                     } break;
                     default:
                     {
@@ -67,5 +69,15 @@ public class ImageActivity extends Activity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        if (!before.isRecycled())
+            before.recycle();
+        if (!after.isRecycled())
+            after.recycle();
+        System.gc();
+        super.onPause();
     }
 }
