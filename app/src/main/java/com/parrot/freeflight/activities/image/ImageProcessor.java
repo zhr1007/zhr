@@ -87,10 +87,49 @@ public class ImageProcessor {
             Imgproc.circle(bmp,pt,radius,new Scalar(255,0,255,0), 8);
             Log.e("哈哈","已经画圆");
         }
-
        // bmp.recycle();
         return bmp;
     }
+//
+//    static Bitmap  findCircles(Bitmap bitmap){
+//        Log.e("注意！","开始识别圆！");
+//        Mat bmp=new Mat();
+//
+//        Mat  circles=new Mat();
+//        Utils.bitmapToMat(bitmap,bmp);
+////       Bitmap bitmap=Bitmap.;
+////       bitmap=bmp.copy(Bitmap.Config.ARGB_8888, false);
+////        Mat bmpMat = new Mat();Mat bmpGray = new Mat();
+////        Mat circles = new Mat();
+//        //  Scalar  argb=new Scalar(255,0,255,255);  //红色
+//        ///  Point center=new Point();
+//     //   Utils.bitmapToMat(bmp,bmpMat);               //bitmap转Mat格式
+//      //  Imgproc.cvtColor(bmpMat,bmpGray,Imgproc.COLOR_RGB2GRAY);   //转换为灰度图
+//        //   Imgproc.GaussianBlur( bmpGray, bmpGray, new Size(9, 9), 2, 2 );  //高斯滤波
+//        Imgproc.HoughCircles(bmp, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 75); //hough变换找圆
+//        //Imgproc.cvtColor(bmpGray,bmpMat,Imgproc.COLOR_GRAY2RGBA,4);
+//        Log.e("霍夫圆检测", "共检测出 " +  circles.cols()+"个圆"+circles.rows());
+//
+//        for (int i=0;i<circles.rows();i++)
+//        {
+//            double circle[]=circles.get(0,i);
+//            if (circle==null)
+//                break;
+//            Point pt = new Point(Math.round(circle[0]),Math.round(circle[1]))
+//                    ;
+//            int radius=(int)Math.round(circle[2]);
+//
+//            Imgproc.circle(bmp,pt,radius,new Scalar(255,255,0,255),4);
+//            Log.e("哈哈","已经画圆");
+//        }
+//
+//      Bitmap    mutBitmap = Bitmap.createBitmap(bmp.cols(), bmp.rows(),Bitmap.Config.ARGB_8888);
+//
+//     Utils.matToBitmap(bmp,mutBitmap);
+//
+//       // bmp.recycle();
+//        return mutBitmap;
+//    }
     /**
      * 路径在图像中一般呈平行四边形，计算形心的位置
      * 目的是：根据形心与图像中心的差，动态调整四旋翼的路径
