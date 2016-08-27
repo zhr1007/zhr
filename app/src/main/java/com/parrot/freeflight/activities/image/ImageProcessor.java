@@ -36,9 +36,9 @@ public class ImageProcessor {
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
         //HSV filter
-//        mat = hsvFilter(mat);
+        mat = hsvFilter(mat);
 
-        mat = findCircles(mat);
+//        mat = findCircles(mat);
         Utils.matToBitmap(mat, bitmap);
 //        PointF[] centers = centroid(bitmap);
 //
@@ -310,9 +310,9 @@ public class ImageProcessor {
         Mat lower = new Mat();
         Mat upper = new Mat();
 //        Core.inRange(originHSV, new Scalar(0, 80, 50), new Scalar(50, 255, 255), lower);
-        Core.inRange(originHSV, new Scalar(0, 80, 70), new Scalar(5, 255, 255), lower);
+        Core.inRange(originHSV, new Scalar(0, 80, 70), new Scalar(0, 255, 255), lower);
 //        Core.inRange(originHSV, new Scalar(120, 80, 50), new Scalar(179, 255, 255), upper);
-        Core.inRange(originHSV, new Scalar(100, 80, 70), new Scalar(179, 255, 255), upper);
+        Core.inRange(originHSV, new Scalar(100, 80, 70), new Scalar(130, 255, 255), upper);
 
         Mat red = new Mat();
         Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);
