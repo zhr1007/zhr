@@ -11,6 +11,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Size;
@@ -31,154 +32,72 @@ public class ImageProcessor {
     static Bitmap processImage(Bitmap image) {
 //        int width = image.getWidth();
 //        int height = image.getHeight();
-
-        //gaussion blur
         Bitmap bitmap = image.copy(Bitmap.Config.ARGB_8888, false);
+
+        //HSV filter
+        bitmap = hsvFilter(bitmap);
         Mat imgMat = new Mat();
         Mat imgMatBlurred = new Mat();
         Utils.bitmapToMat(bitmap, imgMat);
         Imgproc.GaussianBlur(imgMat, imgMatBlurred, new Size(7, 7), 0, 0);   //
         Utils.matToBitmap(imgMatBlurred, bitmap);
+    bitmap=findCircles(bitmap);
+
+//        PointF[] centers = centroid(bitmap);
 //
+//        PointF center = centers[0];
+//        Log.d(LOG_TAG, "center:" + center.x + "," + center.y);
 //
-//        image = showPicRedBlack(image);//
-
-
-        //HSV filter
-        bitmap = hsvFilter(bitmap);
-        PointF[] centers = centroid(bitmap);
-
-        PointF center = centers[0];
-        Log.d(LOG_TAG, "center:" + center.x + "," + center.y);
-
-        Log.d(LOG_TAG,"center:" + centers[0].x + "," + centers[0].y + ";" + centers[1].x + "," + centers[1].y);
+//        Log.d(LOG_TAG,"center:" + centers[0].x + "," + centers[0].y + ";" + centers[1].x + "," + centers[1].y);
 
         return bitmap;
     }
 
     /**
-     * 图片锐化（拉普拉斯变换）
      *
-     * @param bmp
-     * @return，
-     */
-//    static private Bitmap sharpenImageAmeliorate(Bitmap bmp) {
-//        long start = System.currentTimeMillis();
-//        // 拉普拉斯矩阵
-//        int[] laplacian = new int[]{-1, -1, -1, -1, 9, -1, -1, -1, -1};
-//
-//        int width = bmp.getWidth();
-//        int height = bmp.getHeight();
-//        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-//
-//        int pixR = 0;
-//        int pixG = 0;
-//        int pixB = 0;
-//
-//        int pixColor = 0;
-//
-//        int newR = 0;
-//        int newG = 0;
-//        int newB = 0;
-//
-//        int idx = 0;
-//        float alpha = 0.3F;
-//        int[] pixels = new int[width * height];
-//        bmp.getPixels(pixels, 0, width, 0, 0, width, height);
-//        for (int i = 1, length = height - 1; i < length; i++) {
-//            for (int k = 1, len = width - 1; k < len; k++) {
-//                idx = 0;
-//                for (int m = -1; m <= 1; m++) {
-//                    for (int n = -1; n <= 1; n++) {
-//                        pixColor = pixels[(i + n) * width + k + m];
-//                        pixR = Color.red(pixColor);
-//                        pixG = Color.green(pixColor);
-//                        pixB = Color.blue(pixColor);
-//
-//                        newR = newR + (int) (pixR * laplacian[idx] * alpha);
-//                        newG = newG + (int) (pixG * laplacian[idx] * alpha);
-//                        newB = newB + (int) (pixB * laplacian[idx] * alpha);
-//                        idx++;
-//                    }
-//                }
-//
-//                newR = Math.min(255, Math.max(0, newR));
-//                newG = Math.min(255, Math.max(0, newG));
-//                newB = Math.min(255, Math.max(0, newB));
-//
-//                pixels[i * width + k] = Color.argb(255, newR, newG, newB);
-//                newR = 0;
-//                newG = 0;
-//                newB = 0;
-//            }
-//        }
-//
-//        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-//        long end = System.currentTimeMillis();
-//        Log.d("may", "used time=" + (end - start));
-//        return bitmap;
-//    }
-
-    /**
-     * 判断红色像素点，单独显示，其他点显示为黑色
+     * @param bitmap  黑白两色图
+     * @return
      */
 
-//    static public Bitmap showPicRedBlack(Bitmap bmp) {
-//        int pixR = 0;
-//        int pixG = 0;
-//        int pixB = 0;
-//        double disttemp = 0;                         //临时变量，距离值
-//        int pixColor = 0;
-//        int width = bmp.getWidth();
-//        int height = bmp.getHeight();
-//        // int[] dist = new int[width * height];    //计算每个像素点与标准红色的欧氏距离
-//        int RedDistThreshold = 80;               //若距离大于此阈值，则全设为黑色，否则原样输出
-//        int[] pixelR = new int[width * height];  //R通道
-//        int[] pixelG = new int[width * height];  //G通道
-//        int[] pixelB = new int[width * height];  //B通道
-//        int[] pixels = new int[width * height];   //记录每个像素点的rgb值
-//        //  Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-//        bmp.getPixels(pixels, 0, width, 0, 0, width, height);  //提取图像的RGB值
-//
-//        /**
-//         * for循环，依次读取图像的R,G,B 通道
-//         * 并计算与标准红色距离
-//         *大于阈值，设为黑色
-//         */
-//
-//        for (int i = 0, length = height - 1; i < length; i++) {
-//            for (int j = 0, len = width - 1; j < len; j++) {
-//
-//                pixColor = pixels[i * width + j];
-//                pixR = Color.red(pixColor);
-//                pixG = Color.green(pixColor);
-//                pixB = Color.blue(pixColor);
-//                pixelR[i * width + j] = pixR;
-//                pixelG[i * width + j] = pixG;
-//                pixelB[i * width + j] = pixB;
-//                //计算与红色的欧氏距离
-//                disttemp = (255 - pixR) * (255 - pixR) + pixG * pixG + pixB * pixB;
-//                disttemp = Math.sqrt(disttemp);
-//                //与红色距离大的设为黑色
-//                if (disttemp > RedDistThreshold) {
-//                    pixelR[i * width + j] = 0;
-//                    pixelG[i * width + j] = 0;
-//                    pixelB[i * width + j] = 0;
-//
-//
-//                }
-//
-//                //将修改后的三个通道合并
-//                pixels[i * width + j] = Color.argb(255, pixelR[i * width + j], pixelG[i * width + j], pixelB[i * width + j]);
-//            }
-//
-//        }
-//        //返回修改后的图像
-//        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
-//
-//        return bmp;
-//    }
+    static Bitmap  findCircles(Bitmap bitmap){
+        Log.e("注意！","开始识别圆！");
+        Mat bmp=new Mat();
 
+        Mat  circles=new Mat();
+        Utils.bitmapToMat(bitmap,bmp);
+//       Bitmap bitmap=Bitmap.;
+//       bitmap=bmp.copy(Bitmap.Config.ARGB_8888, false);
+//        Mat bmpMat = new Mat();Mat bmpGray = new Mat();
+//        Mat circles = new Mat();
+        //  Scalar  argb=new Scalar(255,0,255,255);  //红色
+        ///  Point center=new Point();
+     //   Utils.bitmapToMat(bmp,bmpMat);               //bitmap转Mat格式
+      //  Imgproc.cvtColor(bmpMat,bmpGray,Imgproc.COLOR_RGB2GRAY);   //转换为灰度图
+        //   Imgproc.GaussianBlur( bmpGray, bmpGray, new Size(9, 9), 2, 2 );  //高斯滤波
+        Imgproc.HoughCircles(bmp, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 75); //hough变换找圆
+        //Imgproc.cvtColor(bmpGray,bmpMat,Imgproc.COLOR_GRAY2RGBA,4);
+        Log.e("霍夫圆检测", "共检测出 " +  circles.cols()+"个圆"+circles.rows());
+
+        for (int i=0;i<circles.rows();i++)
+        {
+            double circle[]=circles.get(0,i);
+            if (circle==null)
+                break;
+            Point pt = new Point(Math.round(circle[0]),Math.round(circle[1]))
+                    ;
+            int radius=(int)Math.round(circle[2]);
+
+            Imgproc.circle(bmp,pt,radius,new Scalar(255,255,0,255),4);
+            Log.e("哈哈","已经画圆");
+        }
+
+      Bitmap    mutBitmap = Bitmap.createBitmap(bmp.cols(), bmp.rows(),Bitmap.Config.ARGB_8888);
+
+     Utils.matToBitmap(bmp,mutBitmap);
+
+       // bmp.recycle();
+        return mutBitmap;
+    }
     /**
      * 路径在图像中一般呈平行四边形，计算形心的位置
      * 目的是：根据形心与图像中心的差，动态调整四旋翼的路径
