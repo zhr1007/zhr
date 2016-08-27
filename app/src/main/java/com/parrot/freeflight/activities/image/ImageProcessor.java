@@ -87,9 +87,6 @@ public class ImageProcessor {
             Imgproc.circle(bmp,pt,radius,new Scalar(255,0,255,0), 8);
             Log.e("哈哈","已经画圆");
         }
-        Utils.matToBitmap(origin,bitmap);
-        return bitmap;
-
        // bmp.recycle();
         return bmp;
     }
