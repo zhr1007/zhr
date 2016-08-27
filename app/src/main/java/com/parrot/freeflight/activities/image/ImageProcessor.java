@@ -33,16 +33,13 @@ public class ImageProcessor {
 //        int width = image.getWidth();
 //        int height = image.getHeight();
         Bitmap bitmap = image.copy(Bitmap.Config.ARGB_8888, false);
-
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
         //HSV filter
-        bitmap = hsvFilter(bitmap);
-        Mat imgMat = new Mat();
-        Mat imgMatBlurred = new Mat();
-        Utils.bitmapToMat(bitmap, imgMat);
-        Imgproc.GaussianBlur(imgMat, imgMatBlurred, new Size(7, 7), 0, 0);   //
-        Utils.matToBitmap(imgMatBlurred, bitmap);
-    bitmap=findCircles(bitmap);
+//        mat = hsvFilter(mat);
 
+        mat = findCircles(mat);
+        Utils.matToBitmap(mat, bitmap);
 //        PointF[] centers = centroid(bitmap);
 //
 //        PointF center = centers[0];
@@ -55,16 +52,13 @@ public class ImageProcessor {
 
     /**
      *
-     * @param bitmap  黑白两色图
+     * @param bmp  黑白两色图
      * @return
      */
 
-    static Bitmap  findCircles(Bitmap bitmap){
+    static Mat  findCircles(Mat bmp){
         Log.e("注意！","开始识别圆！");
-        Mat bmp=new Mat();
-
-        Mat  circles=new Mat();
-        Utils.bitmapToMat(bitmap,bmp);
+        Mat circles = new Mat();
 //       Bitmap bitmap=Bitmap.;
 //       bitmap=bmp.copy(Bitmap.Config.ARGB_8888, false);
 //        Mat bmpMat = new Mat();Mat bmpGray = new Mat();
@@ -74,29 +68,28 @@ public class ImageProcessor {
      //   Utils.bitmapToMat(bmp,bmpMat);               //bitmap转Mat格式
       //  Imgproc.cvtColor(bmpMat,bmpGray,Imgproc.COLOR_RGB2GRAY);   //转换为灰度图
         //   Imgproc.GaussianBlur( bmpGray, bmpGray, new Size(9, 9), 2, 2 );  //高斯滤波
-        Imgproc.HoughCircles(bmp, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 75); //hough变换找圆
+
+
+        Mat blackwhite = hsvFilter(bmp);
+        Imgproc.HoughCircles(blackwhite, circles, Imgproc.CV_HOUGH_GRADIENT, 2, 100); //hough变换找圆
+
         //Imgproc.cvtColor(bmpGray,bmpMat,Imgproc.COLOR_GRAY2RGBA,4);
         Log.e("霍夫圆检测", "共检测出 " +  circles.cols()+"个圆"+circles.rows());
 
-        for (int i=0;i<circles.rows();i++)
+        for (int i=0; i < circles.cols();i++)
         {
-            double circle[]=circles.get(0,i);
+            double circle[] = circles.get(0,i);
             if (circle==null)
                 break;
-            Point pt = new Point(Math.round(circle[0]),Math.round(circle[1]))
-                    ;
+            Point pt = new Point(Math.round(circle[0]),Math.round(circle[1]));
             int radius=(int)Math.round(circle[2]);
 
-            Imgproc.circle(bmp,pt,radius,new Scalar(255,255,0,255),4);
+            Imgproc.circle(bmp,pt,radius,new Scalar(255,0,255,0), 8);
             Log.e("哈哈","已经画圆");
         }
 
-      Bitmap    mutBitmap = Bitmap.createBitmap(bmp.cols(), bmp.rows(),Bitmap.Config.ARGB_8888);
-
-     Utils.matToBitmap(bmp,mutBitmap);
-
        // bmp.recycle();
-        return mutBitmap;
+        return bmp;
     }
     /**
      * 路径在图像中一般呈平行四边形，计算形心的位置
@@ -306,27 +299,25 @@ public class ImageProcessor {
 
 
     /**
-     * @param bitmap
+     * @param origin
      * @return
      */
-    static public Bitmap hsvFilter(Bitmap bitmap) {
-        Mat origin = new Mat();
-        Utils.bitmapToMat(bitmap, origin);
+    static public Mat hsvFilter(Mat origin) {
 
         Mat originHSV = new Mat();
         Imgproc.cvtColor(origin, originHSV, Imgproc.COLOR_BGR2HSV, 3);
 
         Mat lower = new Mat();
         Mat upper = new Mat();
-        Core.inRange(originHSV, new Scalar(0, 80, 50), new Scalar(50, 255, 255), lower);
-        Core.inRange(originHSV, new Scalar(120, 80, 50), new Scalar(179, 255, 255), upper);
+//        Core.inRange(originHSV, new Scalar(0, 80, 50), new Scalar(50, 255, 255), lower);
+        Core.inRange(originHSV, new Scalar(0, 80, 70), new Scalar(5, 255, 255), lower);
+//        Core.inRange(originHSV, new Scalar(120, 80, 50), new Scalar(179, 255, 255), upper);
+        Core.inRange(originHSV, new Scalar(100, 80, 70), new Scalar(179, 255, 255), upper);
 
         Mat red = new Mat();
         Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);
         Imgproc.GaussianBlur(red, red, new Size(9, 9), 2, 2);
-
-        Utils.matToBitmap(red, bitmap);
-        return bitmap;
+        return red;
     }
 }
 //    static public Bitmap hsvFilter(Bitmap bmp) {
