@@ -45,16 +45,16 @@ public class GameController {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                float power = 0.3f;
+                float power = 0.03f;
 //                controlService.moveForward(power); // slowly move forward
                 while (ardroneStatus == 0 && !Thread.currentThread().isInterrupted()){
 
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        return;
-                    }
+//                    try {
+//                        Thread.sleep(100);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                        return;
+//                    }
 //                    controlService.takePhoto();
 //                    controlService.moveForward(1.0f);
                     GameCommand command = imageToCommand.getCommand();
@@ -76,15 +76,15 @@ public class GameController {
                     else if (command.roll != 0){
                         controlService.setProgressiveCommandEnabled(true);
                         controlService.setProgressiveCommandCombinedYawEnabled(false);
-                        controlService.setYaw(0.0f);
                         controlService.moveForward(0.0f);
+                        controlService.setYaw(0.0f);
                         controlService.setRoll(command.roll);
                     }
                     else if (command.yaw != 0){
                         controlService.setProgressiveCommandEnabled(true);
                         controlService.setProgressiveCommandCombinedYawEnabled(true);
-                        controlService.setRoll(0.0f);
                         controlService.moveForward(0.0f);
+                        controlService.setRoll(0.0f);
                         controlService.setYaw(command.yaw);
                     }
                     else {

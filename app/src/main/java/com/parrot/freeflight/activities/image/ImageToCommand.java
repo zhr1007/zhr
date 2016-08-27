@@ -12,6 +12,7 @@ import android.util.Log;
 import com.parrot.freeflight.activities.game.GameCommand;
 import com.parrot.freeflight.ui.gl.GLBGVideoSprite;
 
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
 import java.io.File;
@@ -45,9 +46,16 @@ public class ImageToCommand {
         // use CJM
         bitmap = ImageProcessor.hsvFilter(bitmap);
         PointF[] points = ImageProcessor.centroid(bitmap);
-        bitmap.recycle();
-        float power = 0.02f;
+        if (!bitmap.isRecycled()){
+            bitmap.recycle();
+            System.gc();
+        }
+        float offset = (float) Math.sqrt(points[0].x*points[0].x+points[1].x*points[1].x);
+
+        float power = (float) (Math.pow(2, offset)-1) / 50;
         float powerBig = 0.05f;
+        float yawthre = 0.05f;
+        float rollthre = 0.1f;
         if (points[0].x < -1 && points[0].y < -1 && points[1].x < -1 && points[1].y < -1){
             command.command = "stable";
         }
@@ -57,17 +65,17 @@ public class ImageToCommand {
         else if (points[1].x < -1 && points[1].y < -1 && (points[0].x > -1 || points[0].y > -1)){
             command.pitch = -power;
         }
-        else if (points[0].x < -0.1 && points[1].x < -0.1){
-            command.roll = -powerBig;
+        else if (points[0].x < -rollthre && points[1].x < -rollthre){
+            command.roll = -power;
         }
-        else if (points[0].x > 0.1 && points[1].x > 0.1){
-            command.roll = powerBig;
+        else if (points[0].x > rollthre && points[1].x > rollthre){
+            command.roll = power;
         }
-        else if (points[0].x > 0.1 && points[1].x < -0.1) {
-            command.yaw = powerBig;
+        else if (points[0].x > yawthre && points[1].x < -yawthre) {
+            command.yaw = power;
         }
-        else if (points[0].x < -0.1 && points[1].x > 0.1){
-            command.yaw = -powerBig;
+        else if (points[0].x < -yawthre && points[1].x > yawthre){
+            command.yaw = -power;
         }
         Log.d(LOG_TAG, "center:"+points[0].x + "," + points[0].y + ";" + points[1].x + "," + points[1].y);
         Log.d(LOG_TAG, "command:" + command.pitch + "," + command.roll + "," + command.yaw);
@@ -103,11 +111,13 @@ public class ImageToCommand {
 //        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 //        Bitmap bitmap = BitmapFactory.decodeFile(images[images.length-1].getAbsolutePath(),bmOptions);
 
-        Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
+
         while (!glbgVideoSprite.updateVideoFrame()){
-            bitmap = glbgVideoSprite.getVideoBitmap();
+            Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
+            return bitmap;
         }
-        saveBitmap(bitmap);
+//        saveBitmap(bitmap);
+        Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
         return bitmap;
     }
 
@@ -133,7 +143,6 @@ public class ImageToCommand {
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
         values.put(MediaStore.MediaColumns.DATA, save.getAbsolutePath());
-
         context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 }

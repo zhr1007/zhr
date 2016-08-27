@@ -235,7 +235,7 @@ public class ImageProcessor {
         centerYup = 2 * centerYup / whiteUpNum / height - 1;
         pointFs[0].x = (float) centerXup;
         pointFs[0].y = (float) centerYup;
-        if (whiteUpNum < 100) {
+        if (whiteUpNum < 20) {
             pointFs[0].x = (float) -2.0;
             pointFs[0].y = (float) -2.0;
 
@@ -265,7 +265,7 @@ public class ImageProcessor {
         pointFs[1].y = (float) centerYdown;
 
 
-        if (whiteDownNum < 100) {
+        if (whiteDownNum < 20) {
             pointFs[1].x = (float) -2.0;
             pointFs[1].y = (float) -2.0;
 
