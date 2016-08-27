@@ -12,6 +12,7 @@ import android.util.Log;
 import com.parrot.freeflight.activities.game.GameCommand;
 import com.parrot.freeflight.ui.gl.GLBGVideoSprite;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 
@@ -42,9 +43,11 @@ public class ImageToCommand {
         GameCommand command = new GameCommand();
         // read photo to bitmap
         Bitmap bitmap = loadImage();
-
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
         // use CJM
-        bitmap = ImageProcessor.hsvFilter(bitmap);
+        mat = ImageProcessor.hsvFilter(mat);
+        Utils.matToBitmap(mat, bitmap);
         PointF[] points = ImageProcessor.centroid(bitmap);
         if (!bitmap.isRecycled()){
             bitmap.recycle();
