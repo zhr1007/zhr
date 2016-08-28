@@ -35,66 +35,104 @@ public class GameController {
     }
 
     public void start(){
+        final float gaz_roll_mod = -0.00175f;
+        final float pitch_roll_mod = -0.002f;
+        final float pitch_power = 0.01f;
         controlThread = new Thread(new Runnable() {
             @Override
             public void run() {
 //                controlService.switchCamera(); //switch to the camera below
                 controlService.triggerTakeOff();
                 try {
-                    Thread.sleep(5000);     // wait takeoff
+                    Thread.sleep(3000);     // wait takeoff
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                float power = 0.03f;
 //                controlService.moveForward(power); // slowly move forward
+
+                controlService.setGaz(1.0f);
+//                controlService.setRoll(roll_mod);
+//                controlService.moveForward(0.1f);
+                try {
+                    Thread.sleep(6000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                controlService.setGaz(0.0f);
+
                 while (ardroneStatus == 0 && !Thread.currentThread().isInterrupted()){
 
-//                    try {
-//                        Thread.sleep(100);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                        return;
-//                    }
-//                    controlService.takePhoto();
-//                    controlService.moveForward(1.0f);
                     GameCommand command = imageToCommand.getCommand();
-                    controlService.setProgressiveCommandEnabled(true);
+
                     if (command.command.equals("stable")){
                         controlService.setProgressiveCommandEnabled(false);
                         controlService.setYaw(0.0f);
                         controlService.setRoll(0.0f);
                         controlService.setPitch(0.0f);
-//                        controlService.setPitch(0.0f);
-                    }
-                    else if (command.pitch != 0){
-                        controlService.setProgressiveCommandEnabled(true);
-                        controlService.setProgressiveCommandCombinedYawEnabled(false);
-                        controlService.setYaw(0.0f);
-                        controlService.setRoll(0.0f);
-                        controlService.setPitch(command.pitch);
-                    }
-                    else if (command.roll != 0){
-                        controlService.setProgressiveCommandEnabled(true);
-                        controlService.setProgressiveCommandCombinedYawEnabled(false);
-                        controlService.moveForward(0.0f);
-                        controlService.setYaw(0.0f);
-                        controlService.setRoll(command.roll);
-                    }
-                    else if (command.yaw != 0){
-                        controlService.setProgressiveCommandEnabled(true);
-                        controlService.setProgressiveCommandCombinedYawEnabled(true);
-                        controlService.moveForward(0.0f);
-                        controlService.setRoll(0.0f);
-                        controlService.setYaw(command.yaw);
                     }
                     else {
+                        if (command.yaw != 0){
+                            controlService.setProgressiveCommandCombinedYawEnabled(true);
+                            controlService.setYaw(command.yaw);
+                        }
+                        else {
+                            controlService.setProgressiveCommandCombinedYawEnabled(false);
+                            controlService.setYaw(0.0f);
+                        }
                         controlService.setProgressiveCommandEnabled(true);
-                        controlService.setProgressiveCommandCombinedYawEnabled(false);
-                        controlService.setRoll(0.0f);
-                        controlService.setYaw(0.0f);
-//                        controlService.moveForward(0.0f);
-                        controlService.moveForward(power);
+                        if (command.pitch != 0){
+                            controlService.setPitch(command.pitch);
+                        }
+                        else if (command.yaw == 0){
+                            controlService.setPitch(pitch_power);
+                        }
+                        else {
+                            controlService.setPitch(0.0f);
+                        }
+                        if (command.roll != 0){
+                            controlService.setRoll(command.roll);
+                        }
+                        else {
+                            controlService.setRoll(0.0f);
+                        }
                     }
+//                    else if (command.pitch != 0){
+//                        controlService.setYaw(0.0f);
+//                        controlService.setRoll(0.0f);
+////                        controlService.setPitch(0.0f);
+//                        if (command.pitch < 0)
+//                            controlService.setPitch(-pitch_power);
+//                        else
+//                            controlService.setPitch(pitch_power);
+//                        controlService.setProgressiveCommandEnabled(true);
+//                    }
+//                    else if (command.roll != 0){
+//                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+//                        controlService.moveForward(pitch_power);
+//                        controlService.setYaw(0.0f);
+//                        controlService.setRoll(command.roll);
+//                        controlService.setProgressiveCommandEnabled(true);
+//                    }
+//                    else if (command.yaw != 0){
+//                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+//                        controlService.setProgressiveCommandEnabled(false);
+//                        controlService.moveForward(0.0f);
+//                        controlService.setRoll(0.0f);
+//                        controlService.setYaw(command.yaw);
+//                        try {
+//                            Thread.sleep(300);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                    else {
+//                        controlService.setProgressiveCommandCombinedYawEnabled(false);
+//                        controlService.setRoll(0.0f);
+//                        controlService.setYaw(0.0f);
+////                        controlService.moveForward(0.0f);
+//                        controlService.moveForward(pitch_power);
+//                        controlService.setProgressiveCommandEnabled(true);
+//                    }
                 }
             }
         });

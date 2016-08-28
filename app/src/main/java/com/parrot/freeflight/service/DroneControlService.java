@@ -480,7 +480,7 @@ LocationListener
 	 */
 	public void setRoll(final float value)
 	{
-		droneProxy.setControlValue(CONTROL_SET_ROLL, value-0.01f);
+		droneProxy.setControlValue(CONTROL_SET_ROLL, value);
 	}
 
 	/**

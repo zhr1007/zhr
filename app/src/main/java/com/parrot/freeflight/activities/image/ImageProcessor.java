@@ -38,10 +38,11 @@ public class ImageProcessor {
         //HSV filter
 //        mat = hsvFilter(mat);
 
-        mat = findCircles(mat);
+//        mat = findCircles(mat);
+        mat = findLines(mat);
         Utils.matToBitmap(mat, bitmap);
 
-//        PointF[] centers = centroid(bitmap);
+        PointF[] centers = centroid(bitmap);
 //
 //        Log.d(LOG_TAG,"center:" + centers[0].x + "," + centers[0].y + ";" + centers[1].x + "," + centers[1].y);
 
@@ -136,7 +137,8 @@ public class ImageProcessor {
         centerYup = 2 * centerYup / whiteUpNum / height - 1;
         pointFs[0].x = (float) centerXup;
         pointFs[0].y = (float) centerYup;
-        if (whiteUpNum < 20) {
+        Log.d(LOG_TAG, "whiteUpNum" + whiteUpNum);
+        if (whiteUpNum < 1000) {
             pointFs[0].x = (float) -2.0;
             pointFs[0].y = (float) -2.0;
 
@@ -165,8 +167,8 @@ public class ImageProcessor {
         pointFs[1].x = (float) centerXdown;
         pointFs[1].y = (float) centerYdown;
 
-
-        if (whiteDownNum < 20) {
+        Log.d(LOG_TAG, "whiteDownNum" + whiteDownNum);
+        if (whiteDownNum < 1000) {
             pointFs[1].x = (float) -2.0;
             pointFs[1].y = (float) -2.0;
 
@@ -197,5 +199,64 @@ public class ImageProcessor {
         Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);
         Imgproc.GaussianBlur(red, red, new Size(9, 9), 2, 2);
         return red;
+    }
+
+
+    static public Mat findLines(Mat bmp){
+        Mat blackwhite = hsvFilter(bmp);
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(blackwhite, lines,  1, Math.PI/180, 50, 200, 200);
+        Point start;
+        Point end;
+        for (int x = 0; x < lines.cols(); x++)
+        {
+            double[] vec = lines.get(0, x);
+            double x1 = vec[0],
+                    y1 = vec[1],
+                    x2 = vec[2],
+                    y2 = vec[3];
+            start = new Point(x1, y1);
+            end = new Point(x2, y2);
+            Imgproc.line(bmp, start, end, new Scalar(0,255,0), 3);
+        }
+        return bmp;
+    }
+
+    static public Point[] findLinesP(Mat bmp){
+        Mat blackwhite = hsvFilter(bmp);
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(blackwhite, lines,  1, Math.PI/180, 50, 300, 200);
+        Point start;
+        Point end;
+        double length = 0.0;
+        Point[] points = new Point[2];
+        if (lines.cols() == 0){
+            return null;
+        }
+        for (int x = 0; x < lines.cols(); x++)
+        {
+            double[] vec = lines.get(0, x);
+            double x1 = vec[0],
+                    y1 = vec[1],
+                    x2 = vec[2],
+                    y2 = vec[3];
+            start = new Point(x1, y1);
+            end = new Point(x2, y2);
+            double tmpl = Math.pow(start.x-end.x, 2) + Math.pow(start.y-end.y, 2);
+            if (tmpl > length){
+                points[0] = start;
+                points[1] = end;
+                length = tmpl;
+            }
+        }
+        if (points[0].y < points[1].y){
+            double tmp = points[0].y;
+            points[0].y = points[1].y;
+            points[1].y = tmp;
+            tmp = points[0].x;
+            points[0].x = points[1].x;
+            points[1].x = tmp;
+        }
+        return points;
     }
 }

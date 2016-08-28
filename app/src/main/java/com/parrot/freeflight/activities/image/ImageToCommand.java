@@ -39,6 +39,70 @@ public class ImageToCommand {
         glbgVideoSprite.setAlpha(1.0f);
     }
 
+    float lastpower = 0.0f;
+
+//    public GameCommand getCommand(){
+//        GameCommand command = new GameCommand();
+//        // read photo to bitmap
+//        Bitmap bitmap = loadImage();
+//        Mat mat = new Mat();
+//        Utils.bitmapToMat(bitmap, mat);
+//        // use CJM
+//        Mat hsv = ImageProcessor.hsvFilter(mat);
+//        Point[] line = ImageProcessor.findLinesP(mat);
+//        Utils.matToBitmap(hsv, bitmap);
+//        PointF[] points = ImageProcessor.centroid(bitmap);
+//        if (!bitmap.isRecycled()){
+//            bitmap.recycle();
+//            System.gc();
+//        }
+//        float offset = (float) Math.sqrt(points[0].x*points[0].x+points[1].x*points[1].x);
+//
+//        float power = (float) (Math.pow(2, offset)-1);
+//        power = (float) (Math.pow(2, power) - 1) / 300;
+////        power = power - lastpower;
+////        lastpower = power;
+//
+//        float yawthre = 0.05f;
+//        float rollthre = 0.1f;
+//        float kthre = 2.0f;
+//
+//        float k;
+//        if (line == null)
+//            k = 100.0f;
+//        else
+//            k = (float) ((line[0].y - line[1].y)/(line[0].x - line[1].x));
+//
+//        if (points[0].x < -1 && points[0].y < -1 && points[1].x < -1 && points[1].y < -1){
+//            command.command = "stable";
+//        }
+//        else if (points[0].x < -1 && points[0].y < -1 && (points[1].x > -1 || points[1].y > -1)  && Math.abs(k) > kthre){
+//            command.pitch = power;
+//        }
+//        else if (points[1].x < -1 && points[1].y < -1 && (points[0].x > -1 || points[0].y > -1)  && Math.abs(k) > kthre){
+//            command.pitch = -power;
+//        }
+//        else {
+//            Log.d(LOG_TAG, "k:" + k);
+//            if (points[0].x < -rollthre && points[1].x < -rollthre && Math.abs(k) > kthre){
+//                command.roll = -power;
+//            }
+//            else if (points[0].x > rollthre && points[1].x > rollthre && Math.abs(k) > kthre){
+//                command.roll = power;
+//            }
+//            else if (k > 0 && k < 0.5) {
+//                command.yaw = (float) 0.1/k;
+//            }
+//            else if (k < 0 && k >-0.5){
+//                command.yaw = (float) 0.1/k;
+//            }
+//        }
+//
+//        Log.d(LOG_TAG, "center:"+points[0].x + "," + points[0].y + ";" + points[1].x + "," + points[1].y);
+//        Log.d(LOG_TAG, "command:" + command.pitch + "," + command.roll + "," + command.yaw);
+//        return command;
+//    }
+
     public GameCommand getCommand(){
         GameCommand command = new GameCommand();
         // read photo to bitmap
@@ -46,44 +110,59 @@ public class ImageToCommand {
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
         // use CJM
-        mat = ImageProcessor.hsvFilter(mat);
-        Utils.matToBitmap(mat, bitmap);
-        PointF[] points = ImageProcessor.centroid(bitmap);
+//        Mat hsv = ImageProcessor.hsvFilter(mat);
+        Point[] line = ImageProcessor.findLinesP(mat);
+//        Utils.matToBitmap(hsv, bitmap);
+//        PointF[] points = ImageProcessor.centroid(bitmap);
         if (!bitmap.isRecycled()){
             bitmap.recycle();
             System.gc();
         }
-        float offset = (float) Math.sqrt(points[0].x*points[0].x+points[1].x*points[1].x);
 
-        float power = (float) (Math.pow(2, offset)-1) / 50;
-        float powerBig = 0.05f;
-        float yawthre = 0.05f;
-        float rollthre = 0.1f;
-        if (points[0].x < -1 && points[0].y < -1 && points[1].x < -1 && points[1].y < -1){
+        float k;
+        if (line == null) {
+            k = 100.0f;
             command.command = "stable";
         }
-        else if (points[0].x < -1 && points[0].y < -1 && (points[1].x > -1 || points[1].y > -1)){
-            command.pitch = power;
+        else {
+            k = (float) ((line[0].y - line[1].y) / (line[0].x - line[1].x));
+            Point center = new Point((line[0].x+line[1].x)/2, (line[0].y+line[1].y)/2);
+
+            float rollThre = 0.1f;
+            float kThre = 2.0f;
+            float pitchThre = 0.4f;
+
+            if (Math.abs(center.x) > rollThre){
+                int sign = 1;
+                if (center.x < 0)
+                    sign = -1;
+                float power = (float) (Math.pow(2, Math.abs(center.x))-1);
+                power = (float) (Math.pow(2, power) - 1) / 300;
+                command.roll = sign * power;
+            }
+            if (Math.abs(center.y) > pitchThre){
+                int sign = 1;
+                if (center.y < 0)
+                    sign = -1;
+                float power = (float) (Math.pow(2, Math.abs(center.y))-1);
+                power = (float) (Math.pow(2, power) - 1) / 100;
+                command.pitch = sign * power;
+            }
+            if (Math.abs(k) < kThre ){
+                int sign = 1;
+                if (k < 0)
+                    sign = -1;
+                float power = (float) (Math.pow(2, Math.abs((2-k)/2))-1);
+                command.yaw = sign * power;
+            }
+            Log.d(LOG_TAG, "line:"+line[0].x + "," + line[0].y + ";" + line[1].x + "," + line[1].y);
         }
-        else if (points[1].x < -1 && points[1].y < -1 && (points[0].x > -1 || points[0].y > -1)){
-            command.pitch = -power;
-        }
-        else if (points[0].x < -rollthre && points[1].x < -rollthre){
-            command.roll = -power;
-        }
-        else if (points[0].x > rollthre && points[1].x > rollthre){
-            command.roll = power;
-        }
-        else if (points[0].x > yawthre && points[1].x < -yawthre) {
-            command.yaw = power;
-        }
-        else if (points[0].x < -yawthre && points[1].x > yawthre){
-            command.yaw = -power;
-        }
-        Log.d(LOG_TAG, "center:"+points[0].x + "," + points[0].y + ";" + points[1].x + "," + points[1].y);
+
+
         Log.d(LOG_TAG, "command:" + command.pitch + "," + command.roll + "," + command.yaw);
         return command;
     }
+
 
     private Bitmap loadImage(){
 //        // find image path of Android
@@ -116,11 +195,9 @@ public class ImageToCommand {
 
 
         while (!glbgVideoSprite.updateVideoFrame()){
-            Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
-            return bitmap;
         }
-//        saveBitmap(bitmap);
         Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
+        saveBitmap(bitmap);
         return bitmap;
     }
 

@@ -336,9 +336,9 @@ public class GameActivity
             @Override
             public void onValueChanged(float theCurrentValue)
             {
-//                if (droneControlService != null) {
-//                    droneControlService.setGaz(theCurrentValue);
-//                }
+                if (droneControlService != null) {
+                    droneControlService.setGaz(theCurrentValue);
+                }
             }
         });
 
