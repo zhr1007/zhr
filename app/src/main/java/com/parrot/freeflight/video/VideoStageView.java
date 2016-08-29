@@ -148,12 +148,12 @@ implements
             while (run) {
                 c = null;
 
-                //limit frame rate to max 60fps
+                //limit frame rate to max 10fps
                 timeNow = System.currentTimeMillis();
                 timeDelta = timeNow - timePrevFrame;
-                if ( timeDelta < 16) {
+                if ( timeDelta < 100) {
                     try {
-                        Thread.sleep(16 - timeDelta);
+                        Thread.sleep(100 - timeDelta);
                     }
                     catch(InterruptedException e) {
 
@@ -163,12 +163,12 @@ implements
                 timePrevFrame = System.currentTimeMillis();
 
                 try {
-            	  	renderer.updateVideoFrame();  
+//            	  	renderer.updateVideoFrame();
                 	c = surfaceHolder.lockCanvas(null);
 
-                	synchronized (surfaceHolder) {	
-                		view.onDraw(c);
-                	}                 
+//                	synchronized (surfaceHolder) {
+//                		view.onDraw(c);
+//                	}
             	} finally {
                     if (c != null) {
                         surfaceHolder.unlockCanvasAndPost(c);

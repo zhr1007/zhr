@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.parrot.freeflight.activities.image.ImageToCommand;
 import com.parrot.freeflight.service.DroneControlService;
+import com.parrot.freeflight.utils.SystemUtils;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -37,7 +38,6 @@ public class GameController {
     public void start(){
         final float gaz_roll_mod = -0.00175f;
         final float pitch_roll_mod = -0.002f;
-        final float pitch_power = 0.01f;
         controlThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -49,10 +49,8 @@ public class GameController {
                     e.printStackTrace();
                 }
 //                controlService.moveForward(power); // slowly move forward
-
+                controlService.setProgressiveCommandEnabled(false);
                 controlService.setGaz(1.0f);
-//                controlService.setRoll(roll_mod);
-//                controlService.moveForward(0.1f);
                 try {
                     Thread.sleep(6000);
                 } catch (InterruptedException e) {
@@ -60,41 +58,54 @@ public class GameController {
                 }
                 controlService.setGaz(0.0f);
 
+                long timePre = 0;
+                long timeNow = 0;
+
                 while (ardroneStatus == 0 && !Thread.currentThread().isInterrupted()){
+
+                    timePre = System.currentTimeMillis();
 
                     GameCommand command = imageToCommand.getCommand();
 
+                    timeNow = System.currentTimeMillis();
+                    long timeDelta = timeNow - timePre;
+                    if (timeDelta < 150){
+                        try {
+                            Thread.sleep(150 - timeDelta);
+                        } catch (Exception e) {
+                        }
+                    }
+
+
                     if (command.command.equals("stable")){
                         controlService.setProgressiveCommandEnabled(false);
+                        controlService.setProgressiveCommandCombinedYawEnabled(false);
                         controlService.setYaw(0.0f);
                         controlService.setRoll(0.0f);
                         controlService.setPitch(0.0f);
                     }
                     else {
                         if (command.yaw != 0){
+                            controlService.setProgressiveCommandEnabled(true);
                             controlService.setProgressiveCommandCombinedYawEnabled(true);
                             controlService.setYaw(command.yaw);
-                        }
-                        else {
-                            controlService.setProgressiveCommandCombinedYawEnabled(false);
-                            controlService.setYaw(0.0f);
-                        }
-                        controlService.setProgressiveCommandEnabled(true);
-                        if (command.pitch != 0){
                             controlService.setPitch(command.pitch);
-                        }
-                        else if (command.yaw == 0){
-                            controlService.setPitch(pitch_power);
-                        }
-                        else {
-                            controlService.setPitch(0.0f);
-                        }
-                        if (command.roll != 0){
                             controlService.setRoll(command.roll);
+
+//                            try {
+//                                Thread.sleep(500);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
                         }
                         else {
-                            controlService.setRoll(0.0f);
+                            controlService.setYaw(0.0f);
+                            controlService.setPitch(command.pitch);
+                            controlService.setRoll(command.roll);
+                            controlService.setProgressiveCommandEnabled(true);
+                            controlService.setProgressiveCommandCombinedYawEnabled(false);
                         }
+
                     }
 //                    else if (command.pitch != 0){
 //                        controlService.setYaw(0.0f);

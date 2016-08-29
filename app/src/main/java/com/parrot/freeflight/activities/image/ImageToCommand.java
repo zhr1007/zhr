@@ -15,6 +15,8 @@ import com.parrot.freeflight.ui.gl.GLBGVideoSprite;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,10 +28,13 @@ import java.util.Arrays;
  * Created by shisy13 on 16/8/23.
  */
 public class ImageToCommand {
-    private final String LOG_TAG = getClass().getSimpleName();
+    static private final String LOG_TAG = "ImageToCommand";
 
     Context context;
     GLBGVideoSprite glbgVideoSprite;
+
+    static int imgWidth = 640;
+    static int imgHeight = 360;
 
     int lastCnt = 0;
 
@@ -103,59 +108,77 @@ public class ImageToCommand {
 //        return command;
 //    }
 
-    public GameCommand getCommand(){
+    static public GameCommand pointToCommand(Point[] line){
         GameCommand command = new GameCommand();
-        // read photo to bitmap
-        Bitmap bitmap = loadImage();
-        Mat mat = new Mat();
-        Utils.bitmapToMat(bitmap, mat);
-        // use CJM
-//        Mat hsv = ImageProcessor.hsvFilter(mat);
-        Point[] line = ImageProcessor.findLinesP(mat);
-//        Utils.matToBitmap(hsv, bitmap);
-//        PointF[] points = ImageProcessor.centroid(bitmap);
-        if (!bitmap.isRecycled()){
-            bitmap.recycle();
-            System.gc();
-        }
-
-        float k;
+//        if (line == null && (points[0].x < -1 && points[1].x < -1)) {
         if (line == null) {
-            k = 100.0f;
             command.command = "stable";
         }
         else {
-            k = (float) ((line[0].y - line[1].y) / (line[0].x - line[1].x));
-            Point center = new Point((line[0].x+line[1].x)/2, (line[0].y+line[1].y)/2);
+            float k = 100.0f;
+            Point center = new Point();
+            if (line == null){
+//                k = 100.0f;
+//                if (points[0].x < -1){
+//                    center.x = points[1].x;
+//                    center.y = points[1].y;
+//                }
+//                else if (points[1].x < -1) {
+//                    center.x = points[0].x;
+//                    center.y = points[0].y;
+//                }
+//                else {
+//                    center.x = (points[0].x + points[1].x)/2;
+//                    center.y = (points[0].y + points[1].y)/2;
+//                    k = (points[0].y - points[1].y) / (points[0].x - points[1].x);
+//                }
+            }
+            else {
+                k = (float) -((line[0].y - line[1].y) / (line[0].x - line[1].x));
+                center = new Point((line[0].x+line[1].x)/imgWidth-1, 1-(line[0].y+line[1].y)/imgHeight);
+            }
 
-            float rollThre = 0.1f;
-            float kThre = 2.0f;
+
+            float rollThre = 0.01f;
+            float kThre = 3.0f;
             float pitchThre = 0.4f;
-
+            Log.d(LOG_TAG, "point:"+center.x + "," + center.y);
             if (Math.abs(center.x) > rollThre){
                 int sign = 1;
                 if (center.x < 0)
                     sign = -1;
                 float power = (float) (Math.pow(2, Math.abs(center.x))-1);
-                power = (float) (Math.pow(2, power) - 1) / 300;
+                power = (float) (Math.pow(2, power) - 1);
+                power = power / 100;
+//                power = (float) Math.abs(center.x)/100;
                 command.roll = sign * power;
-            }
-            if (Math.abs(center.y) > pitchThre){
-                int sign = 1;
-                if (center.y < 0)
-                    sign = -1;
-                float power = (float) (Math.pow(2, Math.abs(center.y))-1);
-                power = (float) (Math.pow(2, power) - 1) / 100;
-                command.pitch = sign * power;
             }
             if (Math.abs(k) < kThre ){
                 int sign = 1;
                 if (k < 0)
                     sign = -1;
-                float power = (float) (Math.pow(2, Math.abs((2-k)/2))-1);
-                command.yaw = sign * power;
+                float power = (float) (Math.pow(2, (2 - Math.abs(k))/2) - 1);
+                command.yaw = sign * power / 4;
+//                command.yaw = 0;
             }
-            Log.d(LOG_TAG, "line:"+line[0].x + "," + line[0].y + ";" + line[1].x + "," + line[1].y);
+
+            if (Math.abs(center.y) > pitchThre){
+                int sign = 1;
+                if (center.y > 0)
+                    sign = -1;
+                float power = (float) (Math.pow(2, Math.abs(center.y))-1);
+                power = (float) (Math.pow(2, power) - 1);
+                power = power / 100;
+                command.pitch = sign * power;
+            }
+            else if (line[1].y < 50 && line[0].y > 200 || (command.roll == 0 && command.yaw == 0)){
+                command.pitch = -0.005f;
+            }
+
+            if (line != null)
+                Log.d(LOG_TAG, "line:"+line[0].x + "," + line[0].y + ";" + line[1].x + "," + line[1].y);
+            else
+                Log.d(LOG_TAG, "line:null");
         }
 
 
@@ -163,41 +186,63 @@ public class ImageToCommand {
         return command;
     }
 
+    public GameCommand getCommand(){
+        // read photo to bitmap
+        Bitmap bitmap = loadImage();
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
+        // use CJM
+
+        Point[] line = ImageProcessor.findLinesP(mat);
+        PointF[] points = new PointF[3];
+//        Mat hsv = ImageProcessor.hsvFilter(mat);
+//        Utils.matToBitmap(hsv, bitmap);
+//        points = ImageProcessor.centroid(bitmap);
+        if (!bitmap.isRecycled()){
+            bitmap.recycle();
+            System.gc();
+        }
+
+
+        return pointToCommand(line);
+    }
+
+
+    public GameCommand pointToCommandBall(double[] data){
+        GameCommand command = new GameCommand();
+
+
+
+        return command;
+    }
+
+    public GameCommand getCommandBall(){
+        Bitmap bitmap = loadImage();
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
+        Imgproc.resize(mat, mat, new Size(640, 320));
+        Mat hsv = ImageProcessor.hsvFilter(mat);
+        double[] data = ImageProcessor.lookForRedBall(hsv);
+
+
+
+        if (!bitmap.isRecycled()){
+            bitmap.recycle();
+            System.gc();
+        }
+        return pointToCommandBall(data);
+    }
+
+
+
 
     private Bitmap loadImage(){
-//        // find image path of Android
-//        FilenameFilter filenameFilter = new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String filename) {
-//                return filename.toLowerCase().endsWith(".jpg");
-//            }
-//        };
-//        File[] images = ardroneDir.listFiles(filenameFilter);
-//
-//        // wait for the photo ready
-//        while (images.length == lastCnt){
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            images = ardroneDir.listFiles(filenameFilter);
-//        }
-//        lastCnt = images.length;
-//        Arrays.sort(images);
-//        for (File image: images){
-//            Log.d(LOG_TAG, image.getName());
-//        }
-//
-//        // read the latest photo
-//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//        Bitmap bitmap = BitmapFactory.decodeFile(images[images.length-1].getAbsolutePath(),bmOptions);
-
-
         while (!glbgVideoSprite.updateVideoFrame()){
         }
         Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
-        saveBitmap(bitmap);
+//        imgWidth = bitmap.getWidth();
+//        imgHeight = bitmap.getHeight();
+//        saveBitmap(bitmap);
         return bitmap;
     }
 
