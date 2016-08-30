@@ -216,26 +216,27 @@ public class ImageToCommand {
         }
         else {
             double gazThre = 0.0;
-            double rollThre = 0.2;
+            double yawThre = 0.2;
 
             if (Math.abs(data[4]) > gazThre){
                 int sign = 1;
                 if (data[4] < 0)
                     sign = -1;
-                command.gaz = (float) (sign * (Math.pow(2, Math.abs(data[4])) - 1));
+//                command.gaz = (float) (sign * (Math.pow(2, Math.abs(data[4])) - 1));
+                command.gaz = (float) data[4];
             }
-            if (Math.abs(data[3]) > rollThre){
+            if (Math.abs(data[3]) > yawThre){
                 int sign = 1;
                 if (data[3] < 0)
                     sign = -1;
 
-                command.roll = (float) data[3] / 50;
+                command.yaw = (float) data[3] / 2;
 
 //                double power = Math.pow(2, Math.abs(data[3])) - 1;
 //                power = Math.pow(2, power) - 1;
 //                command.roll = (float) (sign * power)/100;
             }
-            command.pitch = -0.005f;
+//            command.pitch = -0.003f;
 //            double radius = 20;
 //            double offset = data[2]-radius;
 //            if (Math.abs(offset) > 1){
@@ -277,7 +278,7 @@ public class ImageToCommand {
         Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
 //        imgWidth = bitmap.getWidth();
 //        imgHeight = bitmap.getHeight();
-        saveBitmap(bitmap);
+//        saveBitmap(bitmap);
         return bitmap;
     }
 

@@ -65,7 +65,9 @@ public class GameController {
 
                     timePre = System.currentTimeMillis();
 
+                    boolean ball = true;
                     GameCommand command = imageToCommand.getCommandBall();
+//                    GameCommand command = imageToCommand.getCommand();
 
                     timeNow = System.currentTimeMillis();
                     long timeDelta = timeNow - timePre;
@@ -79,35 +81,46 @@ public class GameController {
 
                     if (command.command.equals("stable")){
                         controlService.setProgressiveCommandEnabled(false);
-                        controlService.setProgressiveCommandCombinedYawEnabled(false);
                         controlService.setYaw(0.0f);
                         controlService.setRoll(0.0f);
                         controlService.setPitch(0.0f);
                         controlService.setGaz(0.0f);
                     }
                     else {
-                        if (command.yaw != 0){
-                            controlService.setProgressiveCommandEnabled(true);
-                            controlService.setProgressiveCommandCombinedYawEnabled(true);
-                            controlService.setYaw(command.yaw);
-                            controlService.setPitch(command.pitch);
-                            controlService.setRoll(command.roll);
+
+                        if (ball){
+                            controlService.setProgressiveCommandEnabled(false);
+                            controlService.setProgressiveCommandCombinedYawEnabled(false);
                             controlService.setGaz(command.gaz);
+                            controlService.setYaw(command.yaw);
+                            controlService.setRoll(0.0f);
+                            controlService.setPitch(0.0f);
+                        }
+                        else {
+                            if (command.yaw != 0){
+                                controlService.setProgressiveCommandEnabled(true);
+                                controlService.setProgressiveCommandCombinedYawEnabled(true);
+                                controlService.setYaw(command.yaw);
+                                controlService.setPitch(command.pitch);
+                                controlService.setRoll(command.roll);
+                                controlService.setGaz(command.gaz);
 
 //                            try {
 //                                Thread.sleep(500);
 //                            } catch (InterruptedException e) {
 //                                e.printStackTrace();
 //                            }
+                            }
+                            else {
+                                controlService.setGaz(command.gaz);
+                                controlService.setYaw(command.yaw);
+                                controlService.setPitch(command.pitch);
+                                controlService.setRoll(command.roll);
+                                controlService.setProgressiveCommandEnabled(true);
+                                controlService.setProgressiveCommandCombinedYawEnabled(false);
+                            }
                         }
-                        else {
-                            controlService.setGaz(command.gaz);
-                            controlService.setYaw(0.0f);
-                            controlService.setPitch(command.pitch);
-                            controlService.setRoll(command.roll);
-                            controlService.setProgressiveCommandEnabled(true);
-//                            controlService.setProgressiveCommandCombinedYawEnabled(false);
-                        }
+
 
                     }
 //                    else if (command.pitch != 0){
