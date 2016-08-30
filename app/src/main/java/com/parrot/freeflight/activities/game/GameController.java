@@ -65,7 +65,7 @@ public class GameController {
 
                     timePre = System.currentTimeMillis();
 
-                    GameCommand command = imageToCommand.getCommand();
+                    GameCommand command = imageToCommand.getCommandBall();
 
                     timeNow = System.currentTimeMillis();
                     long timeDelta = timeNow - timePre;
@@ -83,6 +83,7 @@ public class GameController {
                         controlService.setYaw(0.0f);
                         controlService.setRoll(0.0f);
                         controlService.setPitch(0.0f);
+                        controlService.setGaz(0.0f);
                     }
                     else {
                         if (command.yaw != 0){
@@ -91,6 +92,7 @@ public class GameController {
                             controlService.setYaw(command.yaw);
                             controlService.setPitch(command.pitch);
                             controlService.setRoll(command.roll);
+                            controlService.setGaz(command.gaz);
 
 //                            try {
 //                                Thread.sleep(500);
@@ -99,11 +101,12 @@ public class GameController {
 //                            }
                         }
                         else {
+                            controlService.setGaz(command.gaz);
                             controlService.setYaw(0.0f);
                             controlService.setPitch(command.pitch);
                             controlService.setRoll(command.roll);
                             controlService.setProgressiveCommandEnabled(true);
-                            controlService.setProgressiveCommandCombinedYawEnabled(false);
+//                            controlService.setProgressiveCommandCombinedYawEnabled(false);
                         }
 
                     }

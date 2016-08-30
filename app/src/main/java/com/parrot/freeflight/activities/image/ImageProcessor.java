@@ -77,7 +77,8 @@ public class ImageProcessor {
         double[] data = lookForRedBall(bmp);
         Point pt = new Point(Math.round(data[0]),Math.round(data[1]));
         int radius=(int)Math.round(data[2]);
-        Imgproc.circle(bmp,pt,radius,new Scalar(255,0,255,0), 8);
+        if (radius > 0)
+            Imgproc.circle(bmp,pt,radius,new Scalar(255,0,255,0), 8);
         return bmp;
     }
 
@@ -193,9 +194,9 @@ public class ImageProcessor {
         Mat lower = new Mat();
         Mat upper = new Mat();
 //        Core.inRange(originHSV, new Scalar(0, 80, 50), new Scalar(50, 255, 255), lower);
-        Core.inRange(originHSV, new Scalar(0, 140, 70), new Scalar(0, 255, 255), lower);
+        Core.inRange(originHSV, new Scalar(0, 130, 70), new Scalar(0, 255, 255), lower);
 //        Core.inRange(originHSV, new Scalar(120, 80, 50), new Scalar(179, 255, 255), upper);
-        Core.inRange(originHSV, new Scalar(100, 140, 70), new Scalar(130, 255, 255), upper);
+        Core.inRange(originHSV, new Scalar(100, 130, 70), new Scalar(130, 255, 255), upper);
 
         Mat red = new Mat();
         Core.addWeighted(lower, 1.0, upper, 1.0, 0.0, red);
@@ -271,24 +272,15 @@ public class ImageProcessor {
      */
     static double[] lookForRedBall(Mat blackwhite) {
         double[] redBall = {-2.0, -2.0, -2.0, -2.0, -2.0};
-        int width = blackwhite.width();
-        int height = blackwhite.height();
-        int x = 0;
-        int y = 0;
         int  iCannyUpperThreshold = 100;
-        int iMinRadius = 20;
+        int iMinRadius = 40;
         int  iMaxRadius = 400;
         int  iAccumulator = 300;
 
-        Double radius = 0.0;
-        double scale = 0.5;
-        double fx = scale; //宽度放大系数
-        double fy = scale; //高度放大系数
-        Size size = new Size();
-        size.width = 0.0;
-        size.height = 0.0;
+        double radius = 0.0;
+        Size size = new Size(1600, 900);
         Mat resizedMat = new Mat();
-        Imgproc.resize(blackwhite, resizedMat, size, fx, fy, Imgproc.INTER_LINEAR); //线性插值，放大图形2倍
+        Imgproc.resize(blackwhite, resizedMat, size); //线性插值，放大图形2倍
         Log.e("注意！", "开始定位红球！");
         Mat circles = new Mat();
         Imgproc.HoughCircles(resizedMat, circles, Imgproc.CV_HOUGH_GRADIENT, 2, 100, iCannyUpperThreshold, 50, iMinRadius, iMaxRadius); //hough变换找圆
@@ -301,16 +293,21 @@ public class ImageProcessor {
             Log.e("警告！", "红球个数多于一个！将只定位半径最大的红球！");
         }
 
+        int width = (int) size.width;
+        int height = (int) size.height;
+
         //寻找半径最大的红球
         for (int i = 0; i < circles.cols(); i++) {
             double circle[] = circles.get(0, i);
             if (circle[2] > radius) {
+                double scale = 1.0 * height / blackwhite.height();
                 redBall[0] = circle[0] / scale;
                 redBall[1] = circle[1] / scale;
                 redBall[2] = circle[2] / scale;
                 redBall[3] = 2.0 * circle[0] / width - 1.0;
-                redBall[4] = 2.0 * circle[1] / height - 1.0;
+                redBall[4] = 1.0 - 2.0 * circle[1] / height;
                 radius = circle[2] / scale;
+                Log.e("红球半径", ":" + radius);
             }
         }
         Log.d("正常", "已定位红球位置!");
@@ -319,7 +316,7 @@ public class ImageProcessor {
 
     static double[] findBall(Mat origin){
         Mat mat = new Mat();
-        Imgproc.resize(origin, mat, new Size(320, 160));
+        Imgproc.resize(origin, mat, new Size(320, 180));
         long sumX = 0;
         long sumY = 0;
         int num = 0;

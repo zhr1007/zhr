@@ -211,8 +211,45 @@ public class ImageToCommand {
     public GameCommand pointToCommandBall(double[] data){
         GameCommand command = new GameCommand();
 
+        if (data[2] == -2){
+            command.command = "stable";
+        }
+        else {
+            double gazThre = 0.0;
+            double rollThre = 0.2;
 
+            if (Math.abs(data[4]) > gazThre){
+                int sign = 1;
+                if (data[4] < 0)
+                    sign = -1;
+                command.gaz = (float) (sign * (Math.pow(2, Math.abs(data[4])) - 1));
+            }
+            if (Math.abs(data[3]) > rollThre){
+                int sign = 1;
+                if (data[3] < 0)
+                    sign = -1;
 
+                command.roll = (float) data[3] / 50;
+
+//                double power = Math.pow(2, Math.abs(data[3])) - 1;
+//                power = Math.pow(2, power) - 1;
+//                command.roll = (float) (sign * power)/100;
+            }
+            command.pitch = -0.005f;
+//            double radius = 20;
+//            double offset = data[2]-radius;
+//            if (Math.abs(offset) > 1){
+//                if (offset > 0){
+//                    command.pitch = 0.005f;
+//                }
+//                else {
+//                    command.pitch = -0.005f;
+//                }
+//            }
+            Log.d(LOG_TAG, "radius:" + data[2]);
+        }
+        Log.d(LOG_TAG, "data:" + data[2] + "," + data[3] + "," + data[4]);
+        Log.d(LOG_TAG, "command:" + command.pitch + "," + command.roll + "," + command.yaw + "," + command.gaz);
         return command;
     }
 
@@ -220,11 +257,9 @@ public class ImageToCommand {
         Bitmap bitmap = loadImage();
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
-        Imgproc.resize(mat, mat, new Size(640, 320));
         Mat hsv = ImageProcessor.hsvFilter(mat);
+//        Imgproc.resize(mat, mat, new Size(640, 320));
         double[] data = ImageProcessor.lookForRedBall(hsv);
-
-
 
         if (!bitmap.isRecycled()){
             bitmap.recycle();
@@ -242,7 +277,7 @@ public class ImageToCommand {
         Bitmap bitmap = glbgVideoSprite.getVideoBitmap();
 //        imgWidth = bitmap.getWidth();
 //        imgHeight = bitmap.getHeight();
-//        saveBitmap(bitmap);
+        saveBitmap(bitmap);
         return bitmap;
     }
 
